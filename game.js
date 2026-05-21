@@ -1,81 +1,78 @@
 /* ============================================================
-   WHO'S THAT POKÉMON — game.js
+   WHO'S THAT POKÉMON — game.js  (optimised)
    ============================================================ */
 
 const Game = (() => {
 
   // ── State ──────────────────────────────────────────────────
-  let current = null;
-  let lang = 'fr';
-  let score = { correct: 0, wrong: 0 };
-  let hintUsed = false;
+  let current  = null;
+  let next     = null;          // prefetch slot
+  let lang     = 'fr';
+  let score    = { correct: 0, wrong: 0 };
+  let hintStep = 0;             // 0 = unused, 1 = first hint, 2 = extended
   let revealed = false;
-  let loading = false;
+  let loading  = false;
 
   // ── Translations ──────────────────────────────────────────
   const T = {
     fr: {
-      inputLabel : 'ENTREZ LE NOM',
-      inputPH    : 'Tape le nom...',
-      statusReady: 'PRÊT',
-      statusLoad : 'CHARGEMENT...',
+      inputLabel   : 'ENTREZ LE NOM',
+      inputPH      : 'Tape le nom...',
+      statusReady  : 'PRÊT',
+      statusLoad   : 'CHARGEMENT...',
       statusCorrect: 'BONNE RÉP. !',
-      statusWrong: 'MAUVAISE RÉP.',
-      statusReveal: 'RÉVÉLÉ',
-      btnGuess   : 'DEVINER',
-      btnNew     : '— NOUVEAU POKÉMON —',
-      btnHint    : 'INDICE',
-      btnReveal  : 'RÉVÉLER',
-      btnLang    : 'FR / EN',
-      hint       : (letters) => `COMMENCE PAR : ${letters}`,
-      toastCorrect: '✓ BONNE RÉPONSE !',
-      toastWrong  : '✗ RÉESSAIE !',
-      toastReveal : '👁 RÉVÉLÉ',
-      toastHint   : (h) => `💡 ${h}`,
-      toastNoMore : 'CHARGE UN NOUVEAU POKÉMON DABORD',
+      statusWrong  : 'MAUVAISE RÉP.',
+      statusReveal : 'RÉVÉLÉ',
+      btnGuess     : 'DEVINER',
+      btnNew       : '— NOUVEAU POKÉMON —',
+      btnHint      : 'INDICE',
+      btnReveal    : 'RÉVÉLER',
+      btnLang      : 'FR / EN',
+      hint         : (letters) => `COMMENCE PAR : ${letters}`,
+      toastCorrect : '✓ BONNE RÉPONSE !',
+      toastWrong   : '✗ RÉESSAIE !',
+      toastReveal  : '👁 RÉVÉLÉ',
+      toastHint    : (h) => `💡 ${h}`,
+      toastNoMore  : 'CHARGE UN NOUVEAU POKÉMON D\'ABORD',
     },
     en: {
-      inputLabel : 'ENTER NAME',
-      inputPH    : 'Type a name...',
-      statusReady: 'READY',
-      statusLoad : 'LOADING...',
+      inputLabel   : 'ENTER NAME',
+      inputPH      : 'Type a name...',
+      statusReady  : 'READY',
+      statusLoad   : 'LOADING...',
       statusCorrect: 'CORRECT !',
-      statusWrong: 'WRONG !',
-      statusReveal: 'REVEALED',
-      btnGuess   : 'GUESS',
-      btnNew     : '— NEW POKÉMON —',
-      btnHint    : 'HINT',
-      btnReveal  : 'REVEAL',
-      btnLang    : 'EN / FR',
-      hint       : (letters) => `STARTS WITH: ${letters}`,
-      toastCorrect: '✓ CORRECT !',
-      toastWrong  : '✗ TRY AGAIN !',
-      toastReveal : '👁 REVEALED',
-      toastHint   : (h) => `💡 ${h}`,
-      toastNoMore : 'LOAD A NEW POKEMON FIRST',
-    }
+      statusWrong  : 'WRONG !',
+      statusReveal : 'REVEALED',
+      btnGuess     : 'GUESS',
+      btnNew       : '— NEW POKÉMON —',
+      btnHint      : 'HINT',
+      btnReveal    : 'REVEAL',
+      btnLang      : 'EN / FR',
+      hint         : (letters) => `STARTS WITH: ${letters}`,
+      toastCorrect : '✓ CORRECT !',
+      toastWrong   : '✗ TRY AGAIN !',
+      toastReveal  : '👁 REVEALED',
+      toastHint    : (h) => `💡 ${h}`,
+      toastNoMore  : 'LOAD A NEW POKEMON FIRST',
+    },
   };
 
-  // ── DOM refs ──────────────────────────────────────────────
-  const $ = (id) => document.getElementById(id);
-  const els = {
-    img        : () => $('pokemon-img'),
-    screen     : () => $('screen'),
-    overlay    : () => $('screen-overlay'),
-    prompt     : () => $('screen-prompt'),
-    typebar    : () => $('type-bar'),
-    miniStatus : () => $('status-text'),
-    miniName   : () => $('pokemon-name'),
-    miniScore  : () => $('score-display'),
-    input      : () => $('guess-input'),
-    inputLabel : () => $('input-label'),
-    btnGuess   : () => $('btn-guess'),
-    btnNew     : () => $('btn-new'),
-    btnLang    : () => $('btn-lang'),
-  };
+  // ── DOM cache (initialised once) ──────────────────────────
+  const el = {};
+
+  function cacheDom() {
+    const ids = [
+      'pokemon-img', 'screen', 'screen-overlay', 'screen-prompt',
+      'type-bar', 'status-text', 'pokemon-name', 'score-display',
+      'guess-input', 'input-label', 'btn-guess', 'btn-new', 'btn-lang',
+    ];
+    ids.forEach(id => { el[id] = document.getElementById(id); });
+    el.btnHint   = document.querySelector('.btn--hint');
+    el.btnReveal = document.querySelector('.btn--reveal');
+  }
 
   // ── Toast ─────────────────────────────────────────────────
-  let toastEl = null;
+  let toastEl    = null;
   let toastTimer = null;
 
   function showToast(msg, duration = 2200) {
@@ -93,13 +90,13 @@ const Game = (() => {
   // ── Language ──────────────────────────────────────────────
   function applyLang() {
     const t = T[lang];
-    els.inputLabel().textContent = t.inputLabel;
-    els.input().placeholder = t.inputPH;
-    els.btnGuess().querySelector('.btn__top').textContent = t.btnGuess;
-    els.btnNew().querySelector('.btn__top').textContent = t.btnNew;
-    document.querySelector('.btn--lang .btn__top').textContent = t.btnLang;
-    document.querySelector('.btn--hint .btn__top').textContent = t.btnHint;
-    document.querySelector('.btn--reveal .btn__top').textContent = t.btnReveal;
+    el['input-label'].textContent = t.inputLabel;
+    el['guess-input'].placeholder = t.inputPH;
+    el['btn-guess'].querySelector('.btn__top').textContent  = t.btnGuess;
+    el['btn-new'].querySelector('.btn__top').textContent    = t.btnNew;
+    el['btn-lang'].querySelector('.btn__top').textContent   = t.btnLang;
+    el.btnHint.querySelector('.btn__top').textContent       = t.btnHint;
+    el.btnReveal.querySelector('.btn__top').textContent     = t.btnReveal;
     updateScore();
   }
 
@@ -110,128 +107,182 @@ const Game = (() => {
 
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {
-    els.miniScore().innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
+    el['score-display'].innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
   }
 
-  // ── API helpers ───────────────────────────────────────────
+  // ── Fetch + cache ─────────────────────────────────────────
+  const apiCache = new Map();
+
   async function fetchJSON(url) {
+    if (apiCache.has(url)) return apiCache.get(url);
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const data = await res.json();
+    apiCache.set(url, data);
+    return data;
+  }
+
+  function preloadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload  = () => resolve(url);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // ── Load a single Pokémon by id (returns payload) ─────────
+  async function loadById(id) {
+    const [data, species] = await Promise.all([
+      fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`),
+      fetchJSON(`https://pokeapi.co/api/v2/pokemon-species/${id}`),
+    ]);
+
+    const imgUrl =
+      data.sprites.other?.['official-artwork']?.front_default ||
+      data.sprites.front_default;
+
+    await preloadImage(imgUrl);          // image ready before we swap
+    return { data, species, imgUrl };
+  }
+
+  // ── Background prefetch of next Pokémon ──────────────────
+  function prefetchNext() {
+    const id = Math.floor(Math.random() * 1025) + 1;
+    next = loadById(id).catch(() => { next = null; }); // store the Promise
   }
 
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
     if (loading) return;
-    loading = true;
-    hintUsed = false;
+    loading  = true;
+    hintStep = 0;
     revealed = false;
 
-    // Reset UI
-    const screen = els.screen();
-    screen.classList.remove('screen--revealed', 'screen--flash');
-    els.overlay().classList.remove('visible');
-    els.typebar().innerHTML = '';
-    els.miniName().textContent = '';
-    els.miniName().classList.remove('correct');
-    els.miniStatus().textContent = T[lang].statusLoad;
-    screen.classList.add('screen--loading');
-    els.input().value = '';
-    els.input().classList.remove('shake');
+    const screen = el['screen'];
+
+    // 1 – fade out current image
+    screen.classList.add('screen--exit');
+    await sleep(300);
+
+    // 2 – reset UI while hidden
+    screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
+    el['type-bar'].innerHTML   = '';
+    el['pokemon-name'].textContent = '';
+    el['pokemon-name'].classList.remove('correct');
+    el['status-text'].textContent  = T[lang].statusLoad;
+    el['guess-input'].value        = '';
+    el['guess-input'].classList.remove('shake');
 
     try {
-      const id = Math.floor(Math.random() * 1025) + 1;
+      // 3 – use prefetched data if ready, otherwise fetch now
+      const payload = next ? await next : await loadById(randomId());
+      current = payload;
 
-      // Fetch concurrently
-      const data = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      const species = await fetchJSON(data.species.url);
+      el['pokemon-img'].src         = payload.imgUrl;
+      el['status-text'].textContent = T[lang].statusReady;
 
-      current = { data, species };
-
-      // Set image (preload)
-      const imgUrl = data.sprites.other['official-artwork'].front_default
-                  || data.sprites.front_default;
-
-      await new Promise((resolve, reject) => {
-        const tmp = new Image();
-        tmp.onload = resolve;
-        tmp.onerror = reject;
-        tmp.src = imgUrl;
-      });
-
-      els.img().src = imgUrl;
-      screen.classList.remove('screen--loading');
-      els.miniStatus().textContent = T[lang].statusReady;
+      // 4 – start prefetching next one silently
+      next = null;
+      prefetchNext();
 
     } catch (err) {
       console.error(err);
-      screen.classList.remove('screen--loading');
-      els.miniStatus().textContent = 'ERREUR';
+      el['status-text'].textContent = 'ERREUR';
       showToast('API ERROR – RETRY', 3000);
+      current = null;
     }
 
     loading = false;
+    el['guess-input'].focus();
+  }
+
+  function randomId() {
+    return Math.floor(Math.random() * 1025) + 1;
+  }
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  // ── Normalise for comparison ──────────────────────────────
+  function normalize(s) {
+    return s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .toLowerCase();
+  }
+
+  function getNames() {
+    if (!current) return { en: '', fr: '' };
+    const frEntry = current.species.names.find(n => n.language.name === 'fr');
+    return {
+      en: current.data.name,
+      fr: frEntry ? frEntry.name : current.data.name,
+    };
   }
 
   // ── Check guess ───────────────────────────────────────────
   function check() {
     if (!current || revealed) return;
 
-    const guess = els.input().value.trim().toLowerCase();
+    const guess = el['guess-input'].value.trim();
     if (!guess) return;
 
-    const enName = current.data.name.toLowerCase();
-    const frEntry = current.species.names.find(n => n.language.name === 'fr');
-    const frName = frEntry ? frEntry.name.toLowerCase() : '';
-
-    const normalize = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g,'');
-
-    const isCorrect = normalize(guess) === normalize(enName)
-                   || normalize(guess) === normalize(frName);
+    const names    = getNames();
+    const isCorrect =
+      normalize(guess) === normalize(names.en) ||
+      normalize(guess) === normalize(names.fr);
 
     if (isCorrect) {
-      revealPokemon(true);
       score.correct++;
-      els.miniStatus().textContent = T[lang].statusCorrect;
+      revealPokemon(true);
+      el['status-text'].textContent = T[lang].statusCorrect;
       showToast(T[lang].toastCorrect);
     } else {
       score.wrong++;
-      els.input().classList.remove('shake');
-      void els.input().offsetWidth; // reflow
-      els.input().classList.add('shake');
-      setTimeout(() => els.input().classList.remove('shake'), 400);
-      els.miniStatus().textContent = T[lang].statusWrong;
+      shake(el['guess-input']);
+      el['status-text'].textContent = T[lang].statusWrong;
       showToast(T[lang].toastWrong, 1500);
+      el['guess-input'].select();
     }
+
     updateScore();
+  }
+
+  function shake(node) {
+    node.classList.remove('shake');
+    void node.offsetWidth;           // force reflow
+    node.classList.add('shake');
+    node.addEventListener('animationend', () => node.classList.remove('shake'), { once: true });
   }
 
   // ── Reveal ────────────────────────────────────────────────
   function reveal() {
     if (!current || revealed) return;
+    score.wrong++;                   // penalty for revealing
     revealPokemon(false);
-    els.miniStatus().textContent = T[lang].statusReveal;
+    el['status-text'].textContent = T[lang].statusReveal;
     showToast(T[lang].toastReveal, 2000);
+    updateScore();
   }
 
   function revealPokemon(correct) {
     revealed = true;
-    const screen = els.screen();
+
+    const screen = el['screen'];
     screen.classList.add('screen--revealed');
     if (correct) screen.classList.add('screen--flash');
 
     // Name
-    const frEntry = current.species.names.find(n => n.language.name === 'fr');
-    const frName = frEntry ? frEntry.name : current.data.name;
-    const enName = current.data.name;
-
-    const displayName = lang === 'fr' ? frName : enName;
-    els.miniName().textContent = displayName.toUpperCase();
-    if (correct) els.miniName().classList.add('correct');
+    const names       = getNames();
+    const displayName = lang === 'fr' ? names.fr : names.en;
+    el['pokemon-name'].textContent = displayName.toUpperCase();
+    if (correct) el['pokemon-name'].classList.add('correct');
 
     // Types
-    const types = current.data.types;
-    els.typebar().innerHTML = types
+    el['type-bar'].innerHTML = current.data.types
       .map((t, i) =>
         `<span class="type-badge type-${t.type.name}"
                style="animation-delay:${i * 0.15}s">
@@ -243,20 +294,22 @@ const Game = (() => {
 
   // ── Hint ──────────────────────────────────────────────────
   function hint() {
-    if (!current) { showToast(T[lang].toastNoMore); return; }
+    if (!current)  { showToast(T[lang].toastNoMore); return; }
     if (revealed)  { showToast(T[lang].toastNoMore); return; }
 
-    const frEntry = current.species.names.find(n => n.language.name === 'fr');
-    const name = lang === 'fr'
-      ? (frEntry ? frEntry.name : current.data.name)
-      : current.data.name;
+    const names = getNames();
+    const name  = lang === 'fr' ? names.fr : names.en;
 
-    const hintLen = hintUsed ? Math.min(3, name.length) : 1;
-    hintUsed = true;
-    const hintStr = name.slice(0, hintLen).toUpperCase();
-    const hintMsg = T[lang].hint(hintStr + '...');
+    // Progressive: 1 letter → 3 letters → 5 letters
+    const steps  = [1, 3, 5];
+    const len    = steps[Math.min(hintStep, steps.length - 1)];
+    hintStep     = Math.min(hintStep + 1, steps.length - 1);
+
+    const hintStr = name.slice(0, len).toUpperCase() + '...';
+    const hintMsg = T[lang].hint(hintStr);
+
+    el['status-text'].textContent = hintMsg;
     showToast(T[lang].toastHint(hintMsg), 3000);
-    els.miniStatus().textContent = hintMsg;
   }
 
   // ── Keyboard ──────────────────────────────────────────────
@@ -265,10 +318,23 @@ const Game = (() => {
   });
 
   // ── Init ──────────────────────────────────────────────────
-  applyLang();
-  newPokemon();
+  function init() {
+    cacheDom();
+    applyLang();
+    newPokemon();
 
-  // Public API
+    // Wire buttons via JS (no inline onclick needed in HTML,
+    // but kept compatible if HTML still has onclick attrs)
+    el['btn-guess'].addEventListener('click', check);
+    el['btn-new'].addEventListener('click', newPokemon);
+    el['btn-lang'].addEventListener('click', toggleLang);
+    el.btnHint.addEventListener('click', hint);
+    el.btnReveal.addEventListener('click', reveal);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  // Public API (kept for inline onclick compatibility)
   return { newPokemon, toggleLang, check, reveal, hint };
 
 })();

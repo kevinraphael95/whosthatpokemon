@@ -741,3 +741,24 @@ body {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ============================================================
+   PATCH — à ajouter dans style.css
+   (transition entre Pokémon)
+   ============================================================ */
+
+/* Fade-out propre avant le swap */
+.screen--exit #pokemon-img {
+  opacity: 0;
+  transform: scale(0.85);
+  filter: brightness(0) !important;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* S'assure que la transition est smooth dans tous les états */
+#pokemon-img {
+  transition:
+    filter 0.5s ease,
+    transform 0.5s cubic-bezier(.34, 1.56, .64, 1),
+    opacity 0.25s ease;
+}

@@ -1,15 +1,15 @@
 /* ============================================================
-   WHO'S THAT POKÉMON — game.js  (optimised)
+   WHO'S THAT POKÉMON — game.js
    ============================================================ */
 
 const Game = (() => {
 
-  // ── State ──────────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────
   let current  = null;
-  let next     = null;          // prefetch slot
+  let next     = null;
   let lang     = 'fr';
   let score    = { correct: 0, wrong: 0 };
-  let hintStep = 0;             // 0 = unused, 1 = first hint, 2 = extended
+  let hintStep = 0;
   let revealed = false;
   let loading  = false;
 
@@ -28,12 +28,13 @@ const Game = (() => {
       btnHint      : 'INDICE',
       btnReveal    : 'RÉVÉLER',
       btnLang      : 'FR / EN',
-      hint         : (letters) => `COMMENCE PAR : ${letters}`,
+      screenLabel  : 'DISPLAY / AFFICHAGE',
+      hint         : (l) => `COMMENCE PAR : ${l}`,
       toastCorrect : '✓ BONNE RÉPONSE !',
       toastWrong   : '✗ RÉESSAIE !',
       toastReveal  : '👁 RÉVÉLÉ',
       toastHint    : (h) => `💡 ${h}`,
-      toastNoMore  : 'CHARGE UN NOUVEAU POKÉMON D\'ABORD',
+      toastNoMore  : "CHARGE UN NOUVEAU POKÉMON D'ABORD",
     },
     en: {
       inputLabel   : 'ENTER NAME',
@@ -48,7 +49,8 @@ const Game = (() => {
       btnHint      : 'HINT',
       btnReveal    : 'REVEAL',
       btnLang      : 'EN / FR',
-      hint         : (letters) => `STARTS WITH: ${letters}`,
+      screenLabel  : 'DISPLAY / AFFICHAGE',
+      hint         : (l) => `STARTS WITH: ${l}`,
       toastCorrect : '✓ CORRECT !',
       toastWrong   : '✗ TRY AGAIN !',
       toastReveal  : '👁 REVEALED',
@@ -57,23 +59,22 @@ const Game = (() => {
     },
   };
 
-  // ── DOM cache (initialised once) ──────────────────────────
+  // ── DOM cache ─────────────────────────────────────────────
   const el = {};
 
   function cacheDom() {
-    const ids = [
-      'pokemon-img', 'screen', 'screen-overlay', 'screen-prompt',
-      'type-bar', 'status-text', 'pokemon-name', 'score-display',
-      'guess-input', 'input-label', 'btn-guess', 'btn-new', 'btn-lang',
-    ];
-    ids.forEach(id => { el[id] = document.getElementById(id); });
+    [
+      'pokemon-img','screen','screen-overlay','screen-prompt',
+      'type-bar','status-text','pokemon-name','score-display',
+      'guess-input','input-label','btn-guess','btn-new','btn-lang',
+      'screen-label',
+    ].forEach(id => { el[id] = document.getElementById(id); });
     el.btnHint   = document.querySelector('.btn--hint');
     el.btnReveal = document.querySelector('.btn--reveal');
   }
 
   // ── Toast ─────────────────────────────────────────────────
-  let toastEl    = null;
-  let toastTimer = null;
+  let toastEl = null, toastTimer = null;
 
   function showToast(msg, duration = 2200) {
     if (!toastEl) {
@@ -90,13 +91,19 @@ const Game = (() => {
   // ── Language ──────────────────────────────────────────────
   function applyLang() {
     const t = T[lang];
-    el['input-label'].textContent = t.inputLabel;
-    el['guess-input'].placeholder = t.inputPH;
-    el['btn-guess'].querySelector('.btn__top').textContent  = t.btnGuess;
-    el['btn-new'].querySelector('.btn__top').textContent    = t.btnNew;
-    el['btn-lang'].querySelector('.btn__top').textContent   = t.btnLang;
-    el.btnHint.querySelector('.btn__top').textContent       = t.btnHint;
-    el.btnReveal.querySelector('.btn__top').textContent     = t.btnReveal;
+    el['input-label'].textContent                          = t.inputLabel;
+    el['guess-input'].placeholder                          = t.inputPH;
+    el['screen-label'].textContent                         = t.screenLabel;
+    el['btn-guess'].querySelector('.btn__top').textContent = t.btnGuess;
+    el['btn-new'].querySelector('.btn__top').textContent   = t.btnNew;
+    el['btn-lang'].querySelector('.btn__top').textContent  = t.btnLang;
+    el.btnHint.querySelector('.btn__top').textContent      = t.btnHint;
+    el.btnReveal.querySelector('.btn__top').textContent    = t.btnReveal;
+    // Met à jour le status si c'est un état stable
+    const status = el['status-text'].textContent;
+    if (status === T['fr'].statusReady || status === T['en'].statusReady) {
+      el['status-text'].textContent = t.statusReady;
+    }
     updateScore();
   }
 
@@ -131,25 +138,58 @@ const Game = (() => {
     });
   }
 
-  // ── Load a single Pokémon by id (returns payload) ─────────
+  // ── Load pokemon by id ────────────────────────────────────
   async function loadById(id) {
-    const [data, species] = await Promise.all([
-      fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`),
-      fetchJSON(`https://pokeapi.co/api/v2/pokemon-species/${id}`),
-    ]);
+    const data = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
+
+    // Récupère la species via l'URL dans data (gère les formes alternatives)
+    const species = await fetchJSON(data.species.url);
 
     const imgUrl =
       data.sprites.other?.['official-artwork']?.front_default ||
       data.sprites.front_default;
 
-    await preloadImage(imgUrl);          // image ready before we swap
+    await preloadImage(imgUrl);
     return { data, species, imgUrl };
   }
 
-  // ── Background prefetch of next Pokémon ──────────────────
+  // ── Prefetch ──────────────────────────────────────────────
   function prefetchNext() {
     const id = Math.floor(Math.random() * 1025) + 1;
-    next = loadById(id).catch(() => { next = null; }); // store the Promise
+    next = loadById(id).catch(() => { next = null; });
+  }
+
+  // ── Transition helpers ────────────────────────────────────
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  // Fade out propre : si le pokemon est révélé (couleurs),
+  // on fait d'abord redevenir silhouette, puis on fade
+  async function exitScreen() {
+    const screen = el['screen'];
+    const img    = el['pokemon-img'];
+
+    if (screen.classList.contains('screen--revealed')) {
+      // Repasse en silhouette d'abord
+      img.style.transition = 'filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease';
+      img.style.filter     = 'brightness(0)';
+      img.style.opacity    = '0';
+      img.style.transform  = 'scale(0.85)';
+      await sleep(320);
+    } else {
+      // Déjà silhouette, simple fade
+      screen.classList.add('screen--exit');
+      await sleep(300);
+    }
+  }
+
+  function resetImgStyle() {
+    const img = el['pokemon-img'];
+    img.style.transition = '';
+    img.style.filter     = '';
+    img.style.opacity    = '';
+    img.style.transform  = '';
   }
 
   // ── New Pokémon ───────────────────────────────────────────
@@ -161,28 +201,26 @@ const Game = (() => {
 
     const screen = el['screen'];
 
-    // 1 – fade out current image
-    screen.classList.add('screen--exit');
-    await sleep(300);
+    // 1 – exit animé selon l'état
+    await exitScreen();
 
-    // 2 – reset UI while hidden
+    // 2 – reset
     screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
-    el['type-bar'].innerHTML   = '';
-    el['pokemon-name'].textContent = '';
+    resetImgStyle();
+    el['type-bar'].innerHTML           = '';
+    el['pokemon-name'].textContent     = '';
     el['pokemon-name'].classList.remove('correct');
-    el['status-text'].textContent  = T[lang].statusLoad;
-    el['guess-input'].value        = '';
+    el['status-text'].textContent      = T[lang].statusLoad;
+    el['guess-input'].value            = '';
     el['guess-input'].classList.remove('shake');
 
     try {
-      // 3 – use prefetched data if ready, otherwise fetch now
       const payload = next ? await next : await loadById(randomId());
       current = payload;
 
       el['pokemon-img'].src         = payload.imgUrl;
       el['status-text'].textContent = T[lang].statusReady;
 
-      // 4 – start prefetching next one silently
       next = null;
       prefetchNext();
 
@@ -201,11 +239,7 @@ const Game = (() => {
     return Math.floor(Math.random() * 1025) + 1;
   }
 
-  function sleep(ms) {
-    return new Promise(r => setTimeout(r, ms));
-  }
-
-  // ── Normalise for comparison ──────────────────────────────
+  // ── Normalise ─────────────────────────────────────────────
   function normalize(s) {
     return s
       .normalize('NFD')
@@ -214,23 +248,26 @@ const Game = (() => {
       .toLowerCase();
   }
 
+  // ── Noms EN + FR ──────────────────────────────────────────
   function getNames() {
     if (!current) return { en: '', fr: '' };
+    // Cherche le nom FR dans species.names
     const frEntry = current.species.names.find(n => n.language.name === 'fr');
+    const enEntry = current.species.names.find(n => n.language.name === 'en');
     return {
-      en: current.data.name,
+      en: enEntry ? enEntry.name : current.data.name,
       fr: frEntry ? frEntry.name : current.data.name,
     };
   }
 
-  // ── Check guess ───────────────────────────────────────────
+  // ── Check ─────────────────────────────────────────────────
   function check() {
     if (!current || revealed) return;
 
     const guess = el['guess-input'].value.trim();
     if (!guess) return;
 
-    const names    = getNames();
+    const names     = getNames();
     const isCorrect =
       normalize(guess) === normalize(names.en) ||
       normalize(guess) === normalize(names.fr);
@@ -247,13 +284,12 @@ const Game = (() => {
       showToast(T[lang].toastWrong, 1500);
       el['guess-input'].select();
     }
-
     updateScore();
   }
 
   function shake(node) {
     node.classList.remove('shake');
-    void node.offsetWidth;           // force reflow
+    void node.offsetWidth;
     node.classList.add('shake');
     node.addEventListener('animationend', () => node.classList.remove('shake'), { once: true });
   }
@@ -261,70 +297,55 @@ const Game = (() => {
   // ── Reveal ────────────────────────────────────────────────
   function reveal() {
     if (!current || revealed) return;
-    score.wrong++;                   // penalty for revealing
     revealPokemon(false);
     el['status-text'].textContent = T[lang].statusReveal;
     showToast(T[lang].toastReveal, 2000);
-    updateScore();
   }
 
   function revealPokemon(correct) {
     revealed = true;
-
+    resetImgStyle(); // efface les styles inline si on avait exit en cours
     const screen = el['screen'];
     screen.classList.add('screen--revealed');
     if (correct) screen.classList.add('screen--flash');
 
-    // Name
     const names       = getNames();
     const displayName = lang === 'fr' ? names.fr : names.en;
     el['pokemon-name'].textContent = displayName.toUpperCase();
     if (correct) el['pokemon-name'].classList.add('correct');
 
-    // Types
     el['type-bar'].innerHTML = current.data.types
       .map((t, i) =>
-        `<span class="type-badge type-${t.type.name}"
-               style="animation-delay:${i * 0.15}s">
+        `<span class="type-badge type-${t.type.name}" style="animation-delay:${i * 0.15}s">
            ${t.type.name.toUpperCase()}
          </span>`
-      )
-      .join('');
+      ).join('');
   }
 
   // ── Hint ──────────────────────────────────────────────────
   function hint() {
-    if (!current)  { showToast(T[lang].toastNoMore); return; }
-    if (revealed)  { showToast(T[lang].toastNoMore); return; }
+    if (!current || revealed) { showToast(T[lang].toastNoMore); return; }
 
     const names = getNames();
     const name  = lang === 'fr' ? names.fr : names.en;
-
-    // Progressive: 1 letter → 3 letters → 5 letters
-    const steps  = [1, 3, 5];
-    const len    = steps[Math.min(hintStep, steps.length - 1)];
-    hintStep     = Math.min(hintStep + 1, steps.length - 1);
+    const steps = [1, 3, 5];
+    const len   = steps[Math.min(hintStep, steps.length - 1)];
+    hintStep    = Math.min(hintStep + 1, steps.length - 1);
 
     const hintStr = name.slice(0, len).toUpperCase() + '...';
     const hintMsg = T[lang].hint(hintStr);
-
     el['status-text'].textContent = hintMsg;
     showToast(T[lang].toastHint(hintMsg), 3000);
   }
 
   // ── Keyboard ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') check();
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
 
   // ── Init ──────────────────────────────────────────────────
   function init() {
     cacheDom();
     applyLang();
     newPokemon();
-
-    // Wire buttons via JS (no inline onclick needed in HTML,
-    // but kept compatible if HTML still has onclick attrs)
     el['btn-guess'].addEventListener('click', check);
     el['btn-new'].addEventListener('click', newPokemon);
     el['btn-lang'].addEventListener('click', toggleLang);
@@ -334,7 +355,6 @@ const Game = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  // Public API (kept for inline onclick compatibility)
   return { newPokemon, toggleLang, check, reveal, hint };
 
 })();

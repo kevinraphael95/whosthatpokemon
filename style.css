@@ -334,14 +334,14 @@ body::before {
 .btn--lang .btn__top { background: linear-gradient(180deg, #4fc3f7, #0288d1); color: #001433; font-size: 7px; padding: 11px 8px; }
 
 .btn--new { background: #1a0000; box-shadow: 0 4px 0 #080000; }
-.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: 7px; text-align: center; }
+.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: 11px; text-align: center; }
 .btn--new:hover .btn__top { background: linear-gradient(180deg, #ff7961, #f44336); }
 
 .btn--hint { background: #2a2000; box-shadow: 0 4px 0 #100d00; }
-.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: 8px; text-align: center; }
+.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: 11px; text-align: center; }
 
 .btn--reveal { background: #1a0030; box-shadow: 0 4px 0 #090015; }
-.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: 8px; text-align: center; }
+.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: 11px; text-align: center; }
 
 /* Dpad */
 .dpad-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; }

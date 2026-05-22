@@ -312,7 +312,7 @@ body::before {
 .btn--guess:hover .btn__top { background: linear-gradient(180deg, #76ff99, #4caf50); }
 
 .btn--lang { background: #00214a; box-shadow: 0 4px 0 #000d24; min-width: 60px; }
-.btn--lang .btn__top { background: linear-gradient(180deg, #4fc3f7, #0288d1); color: #001433; font-size: 7px; padding: 11px 8px; }
+.btn--lang .btn__top { background: linear-gradient(180deg, #4fc3f7, #0288d1); color: #001433; font-size: 9px; padding: 11px 8px; }
 
 .btn--new { background: #1a0000; box-shadow: 0 4px 0 #080000; }
 .btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: 11px; text-align: center; }

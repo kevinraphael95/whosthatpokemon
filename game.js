@@ -160,20 +160,22 @@ const Game = (() => {
   }
 
   async function exitScreen() {
-    const screen = el['screen'];
-    const img    = el['pokemon-img'];
+      const screen = el['screen'];
+      const img    = el['pokemon-img'];
 
-    if (screen.classList.contains('screen--revealed')) {
-      img.style.transition = 'filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease';
-      img.style.filter     = 'brightness(0)';
-      img.style.opacity    = '0';
-      img.style.transform  = 'scale(0.85)';
-      await sleep(320);
-    } else {
-      screen.classList.add('screen--exit');
-      await sleep(300);
+      if (screen.classList.contains('screen--revealed')) {
+        // Révélé ou deviné : fade out propre
+        img.style.transition = 'filter 0.25s ease, opacity 0.25s ease, transform 0.25s ease';
+        img.style.filter     = 'brightness(0)';
+        img.style.opacity    = '0.3';
+        img.style.transform  = 'scale(0.8) translateY(10px)';
+        await sleep(280);
+      } else {
+        // Encore caché : glitch exit
+        screen.classList.add('screen--exit');
+        await sleep(300);
+      }
     }
-  }
 
   function resetImgStyle() {
     const img = el['pokemon-img'];

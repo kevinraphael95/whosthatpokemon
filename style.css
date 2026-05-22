@@ -322,7 +322,7 @@ body::before {
 /* Buttons */
 .btn { position: relative; border: none; cursor: pointer; font-family: var(--font-pixel); border-radius: var(--radius-sm); padding: 0; transition: transform 0.1s; letter-spacing: 1px; user-select: none; -webkit-tap-highlight-color: transparent; }
 .btn:active { transform: translateY(2px); }
-.btn__top { display: block; padding: 11px 14px; border-radius: inherit; font-size: 9px; transition: background 0.15s; }
+.btn__top { display: block; padding: 11px 14px; border-radius: inherit; font-size: 11px; transition: background 0.15s; }
 .btn-row  { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .hint-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 

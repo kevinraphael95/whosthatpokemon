@@ -99,7 +99,6 @@ const Game = (() => {
     el['btn-lang'].querySelector('.btn__top').textContent  = t.btnLang;
     el.btnHint.querySelector('.btn__top').textContent      = t.btnHint;
     el.btnReveal.querySelector('.btn__top').textContent    = t.btnReveal;
-    // Met à jour le status si c'est un état stable
     const status = el['status-text'].textContent;
     if (status === T['fr'].statusReady || status === T['en'].statusReady) {
       el['status-text'].textContent = t.statusReady;
@@ -141,14 +140,10 @@ const Game = (() => {
   // ── Load pokemon by id ────────────────────────────────────
   async function loadById(id) {
     const data = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
-
-    // Récupère la species via l'URL dans data (gère les formes alternatives)
     const species = await fetchJSON(data.species.url);
-
     const imgUrl =
       data.sprites.other?.['official-artwork']?.front_default ||
       data.sprites.front_default;
-
     await preloadImage(imgUrl);
     return { data, species, imgUrl };
   }
@@ -164,21 +159,17 @@ const Game = (() => {
     return new Promise(r => setTimeout(r, ms));
   }
 
-  // Fade out propre : si le pokemon est révélé (couleurs),
-  // on fait d'abord redevenir silhouette, puis on fade
   async function exitScreen() {
     const screen = el['screen'];
     const img    = el['pokemon-img'];
 
     if (screen.classList.contains('screen--revealed')) {
-      // Repasse en silhouette d'abord
       img.style.transition = 'filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease';
       img.style.filter     = 'brightness(0)';
       img.style.opacity    = '0';
       img.style.transform  = 'scale(0.85)';
       await sleep(320);
     } else {
-      // Déjà silhouette, simple fade
       screen.classList.add('screen--exit');
       await sleep(300);
     }
@@ -198,13 +189,12 @@ const Game = (() => {
     loading  = true;
     hintStep = 0;
     revealed = false;
+    current  = null; // ← FIX : bloque check() pendant tout le chargement
 
     const screen = el['screen'];
 
-    // 1 – exit animé selon l'état
     await exitScreen();
 
-    // 2 – reset
     screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
     resetImgStyle();
     el['type-bar'].innerHTML           = '';
@@ -215,13 +205,15 @@ const Game = (() => {
     el['guess-input'].classList.remove('shake');
 
     try {
-      const payload = next ? await next : await loadById(randomId());
-      current = payload;
+      // Capture next avant de l'effacer, pour éviter toute course
+      const pendingNext = next;
+      next = null;
+      const payload = pendingNext ? await pendingNext : await loadById(randomId());
+      current = payload; // ← current mis à jour APRÈS le chargement complet
 
       el['pokemon-img'].src         = payload.imgUrl;
       el['status-text'].textContent = T[lang].statusReady;
 
-      next = null;
       prefetchNext();
 
     } catch (err) {
@@ -251,7 +243,6 @@ const Game = (() => {
   // ── Noms EN + FR ──────────────────────────────────────────
   function getNames() {
     if (!current) return { en: '', fr: '' };
-    // Cherche le nom FR dans species.names
     const frEntry = current.species.names.find(n => n.language.name === 'fr');
     const enEntry = current.species.names.find(n => n.language.name === 'en');
     return {
@@ -261,18 +252,16 @@ const Game = (() => {
   }
 
   // ── Check ─────────────────────────────────────────────────
-function check() {
-  if (!current || revealed) return;
+  function check() {
+    if (!current || revealed) return;
 
-  const guess = el['guess-input'].value.trim().replace(/\s+/g, ' ');
-  if (!guess) return;
+    const guess = el['guess-input'].value.trim();
+    if (!guess) return;
 
-  const names = getNames();
-  console.log('guess:', JSON.stringify(guess), 'en:', JSON.stringify(names.en), 'fr:', JSON.stringify(names.fr));
-
-  const isCorrect =
-    normalize(guess) === normalize(names.en) ||
-    normalize(guess) === normalize(names.fr);
+    const names = getNames();
+    const isCorrect =
+      normalize(guess) === normalize(names.en) ||
+      normalize(guess) === normalize(names.fr);
 
     if (isCorrect) {
       score.correct++;
@@ -306,7 +295,7 @@ function check() {
 
   function revealPokemon(correct) {
     revealed = true;
-    resetImgStyle(); // efface les styles inline si on avait exit en cours
+    resetImgStyle();
     const screen = el['screen'];
     screen.classList.add('screen--revealed');
     if (correct) screen.classList.add('screen--flash');

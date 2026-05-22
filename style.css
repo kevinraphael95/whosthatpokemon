@@ -391,43 +391,61 @@ body::before {
     animation: none;
   }
 
+  /* LEFT */
   .pokedex__left {
-    width: 100%; border-radius: 0; border-right: none; border-bottom: 4px solid #4a0000;
-    padding: 12px 14px; gap: 10px;
+    width: 100%;
+    border-radius: 0;
+    border-right: none;
+    border-bottom: 4px solid #4a0000;
+    padding: 16px 16px 20px;  /* + de respiration en bas */
+    gap: 14px;                /* était 10px */
     box-shadow: inset 0 2px 0 rgba(255,255,255,0.15), inset 0 -4px 8px rgba(0,0,0,0.3);
   }
   .pokedex__left::before { width: 100px; height: 40px; }
   .pokedex__left::after  { display: none; }
 
-  .lens { width: 40px; height: 40px; }
-  .dot  { width: 9px; height: 9px; }
-  .screen { min-height: 220px; }
-  #pokemon-img { max-height: 190px; }
-  .type-badge { font-size: 6px; padding: 3px 8px; }
-  .type-bar   { min-height: 24px; gap: 6px; }
+  .lens { width: 44px; height: 44px; }  /* légèrement plus grand */
+  .dot  { width: 10px; height: 10px; }
+
+  .screen { min-height: 240px; }         /* plus de hauteur = respire */
+  #pokemon-img { max-height: 210px; }
+
+  .type-badge { font-size: 7px; padding: 4px 10px; }
+  .type-bar   { min-height: 28px; gap: 6px; }
   .speaker    { display: none; }
 
-  /* Hinge invisible sur mobile */
+  /* HINGE */
   .hinge { display: none; }
 
+  /* RIGHT */
   .pokedex__right {
-    width: 100%; border-radius: 0; padding: 14px 14px 20px; gap: 12px;
+    width: 100%;
+    border-radius: 0;
+    padding: 20px 16px 28px;  /* padding uniforme + généreux */
+    gap: 14px;                /* était 12px */
     box-shadow: inset 0 -2px 0 rgba(255,255,255,0.08), inset 0 4px 8px rgba(0,0,0,0.3);
   }
   .pokedex__right::before { display: none; }
 
-  .mini-screen { min-height: 52px; padding: 8px 12px; }
-  .mini-screen__status { font-size: 7px; }
-  .mini-screen__name   { font-size: 9px; }
-  .mini-screen__score  { font-size: 6px; }
+  /* Mini-screen */
+  .mini-screen { min-height: 60px; padding: 10px 14px; }
+  .mini-screen__status { font-size: 8px; }
+  .mini-screen__name   { font-size: 10px; }
+  .mini-screen__score  { font-size: 7px; }
 
-  #guess-input { font-size: 10px; padding: 10px 12px; }
+  /* Input */
+  #guess-input { font-size: 11px; padding: 13px 14px; }  /* taille uniforme */
 
-  /* Boutons plus lisibles */
-  .btn__top    { padding: 13px 10px; font-size: 9px; }
-  .btn--lang .btn__top { font-size: 8px; }
-  .btn--new .btn__top  { font-size: 8px; }
+  /* BOUTONS — tous à la même taille */
+  .btn__top           { padding: 14px 12px; font-size: 10px; }  /* +1px vs avant */
+  .btn--lang .btn__top { font-size: 9px; padding: 14px 10px; }
+  .btn--new .btn__top  { font-size: 10px; }
+  .hint-row { gap: 10px; }  /* était 8px */
+  .btn-row  { gap: 10px; }
 
-  .dpad-area   { display: none; }
-  .toast       { font-size: 8px; padding: 10px 16px; bottom: 16px; }
+  /* Dpad */
+  .dpad-area { display: none; }
+
+  /* Toast */
+  .toast { font-size: 9px; padding: 12px 18px; bottom: 20px; }
 }

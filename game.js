@@ -234,10 +234,10 @@ const Game = (() => {
   // ── Normalise ─────────────────────────────────────────────
   function normalize(s) {
     return s
+      .toLowerCase()           // ← DÉPLACE toLowerCase ICI, en premier
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, '')
-      .toLowerCase();
+      .replace(/[^a-z0-9]/g, '');
   }
 
   // ── Noms EN + FR ──────────────────────────────────────────

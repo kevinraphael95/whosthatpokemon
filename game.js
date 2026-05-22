@@ -104,10 +104,17 @@ const Game = (() => {
     }
     updateScore();
   }
-
+   
   function toggleLang() {
     lang = lang === 'fr' ? 'en' : 'fr';
     applyLang();
+  
+    // Met à jour le nom révélé si un pokemon est affiché
+    if (revealed && current) {
+      const names = getNames();
+      const displayName = lang === 'fr' ? names.fr : names.en;
+      el['pokemon-name'].textContent = displayName.toUpperCase();
+    }
   }
 
   // ── Score ─────────────────────────────────────────────────

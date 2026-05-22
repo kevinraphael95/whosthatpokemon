@@ -354,7 +354,7 @@ body::before {
    ============================================================ */
 @media (max-width: 820px) {
   body {
-    background: #b71c1c;
+    background: #7f0000;
     align-items: flex-start;
     overflow-y: auto;
     overflow-x: hidden;
@@ -375,20 +375,22 @@ body::before {
     width: 100%;
     border-radius: 0;
     border: none;
-    padding: 10px 14px 12px;
-    gap: 8px;
+    padding: 8px 14px 8px;
+    gap: 6px;
     box-shadow: none;
     background: linear-gradient(180deg, #ef5350 0%, #b71c1c 100%);
   }
   .pokedex__left::before { width: 100px; height: 40px; }
   .pokedex__left::after  { content: none; }
 
+  .screen-wrapper { gap: 4px; }
+  .screen-label { display: none; }
   .lens { width: 44px; height: 44px; }
   .dot  { width: 10px; height: 10px; }
   .screen { min-height: 240px; }
   #pokemon-img { max-height: 210px; }
   .type-badge { font-size: 7px; padding: 4px 10px; }
-  .type-bar   { min-height: 28px; gap: 6px; }
+  .type-bar   { min-height: 22px; gap: 6px; }
   .speaker    { display: none; }
   .hinge      { display: none; }
 
@@ -400,6 +402,7 @@ body::before {
     gap: 8px;
     box-shadow: none;
     background: linear-gradient(180deg, #b71c1c 0%, #7f0000 100%);
+    flex: 1;
   }
   .pokedex__right::before { content: none; }
 

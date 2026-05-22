@@ -377,75 +377,64 @@ body::before {
   body {
     background: #0a0a0a;
     align-items: flex-start;
-    overflow-y: auto;
-    overflow-x: hidden;
-    min-height: 100dvh;
+    overflow: hidden;          /* plus de scroll du tout */
+    height: 100dvh;
   }
-  body::before { display: none; }
 
   .pokedex {
     flex-direction: column;
     width: 100%;
-    min-height: 100dvh;
+    height: 100dvh;            /* remplit exactement l'écran */
     border-radius: 0;
     animation: none;
   }
 
-  /* LEFT */
   .pokedex__left {
-    width: 100%;
-    border-radius: 0;
+    padding: 8px 14px 10px;
+    gap: 6px;
     border-right: none;
     border-bottom: 4px solid #4a0000;
-    padding: 16px 16px 20px;  /* + de respiration en bas */
-    gap: 14px;                /* était 10px */
-    box-shadow: inset 0 2px 0 rgba(255,255,255,0.15), inset 0 -4px 8px rgba(0,0,0,0.3);
+    border-radius: 0;
+    width: 100%;
   }
-  .pokedex__left::before { width: 100px; height: 40px; }
+  .pokedex__left::before { width: 80px; height: 34px; }
   .pokedex__left::after  { display: none; }
 
-  .lens { width: 44px; height: 44px; }  /* légèrement plus grand */
-  .dot  { width: 10px; height: 10px; }
+  .lens { width: 36px; height: 36px; }
+  .dot  { width: 8px; height: 8px; }
+  .lens-dots { gap: 6px; }
+  .pokedex__lens-group { gap: 10px; }
 
-  .screen { min-height: 240px; }         /* plus de hauteur = respire */
-  #pokemon-img { max-height: 210px; }
+  .screen { min-height: 0; flex: 1; }   /* s'adapte à l'espace restant */
+  #pokemon-img { max-height: 150px; }
 
-  .type-badge { font-size: 7px; padding: 4px 10px; }
-  .type-bar   { min-height: 28px; gap: 6px; }
+  .type-badge { font-size: 6px; padding: 3px 8px; }
+  .type-bar   { min-height: 20px; gap: 5px; }
+  .screen-label { display: none; }      /* gagne de la place */
   .speaker    { display: none; }
+  .hinge      { display: none; }
 
-  /* HINGE */
-  .hinge { display: none; }
-
-  /* RIGHT */
   .pokedex__right {
-    width: 100%;
+    padding: 10px 14px 14px;
+    gap: 8px;
     border-radius: 0;
-    padding: 20px 16px 28px;  /* padding uniforme + généreux */
-    gap: 14px;                /* était 12px */
-    box-shadow: inset 0 -2px 0 rgba(255,255,255,0.08), inset 0 4px 8px rgba(0,0,0,0.3);
+    width: 100%;
   }
   .pokedex__right::before { display: none; }
 
-  /* Mini-screen */
-  .mini-screen { min-height: 60px; padding: 10px 14px; }
-  .mini-screen__status { font-size: 8px; }
-  .mini-screen__name   { font-size: 10px; }
-  .mini-screen__score  { font-size: 7px; }
+  .mini-screen { min-height: 48px; padding: 7px 12px; }
+  .mini-screen__status { font-size: 7px; }
+  .mini-screen__name   { font-size: 9px; }
+  .mini-screen__score  { font-size: 6px; }
 
-  /* Input */
-  #guess-input { font-size: 11px; padding: 13px 14px; }  /* taille uniforme */
+  #guess-input { font-size: 10px; padding: 10px 12px; }
 
-  /* BOUTONS — tous à la même taille */
-  .btn__top           { padding: 14px 12px; font-size: 10px; }  /* +1px vs avant */
-  .btn--lang .btn__top { font-size: 9px; padding: 14px 10px; }
-  .btn--new .btn__top  { font-size: 10px; }
-  .hint-row { gap: 10px; }  /* était 8px */
-  .btn-row  { gap: 10px; }
+  .btn__top            { padding: 11px 10px; font-size: 9px; }
+  .btn--lang .btn__top { font-size: 8px; padding: 11px 8px; }
+  .btn--new .btn__top  { font-size: 9px; }
+  .btn-row  { gap: 8px; }
+  .hint-row { gap: 8px; }
 
-  /* Dpad */
   .dpad-area { display: none; }
-
-  /* Toast */
-  .toast { font-size: 9px; padding: 12px 18px; bottom: 20px; }
+  .toast { font-size: 8px; padding: 10px 16px; bottom: 14px; }
 }

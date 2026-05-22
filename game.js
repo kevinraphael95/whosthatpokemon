@@ -96,7 +96,6 @@ const Game = (() => {
     el['screen-label'].textContent                         = t.screenLabel;
     el['btn-guess'].querySelector('.btn__top').textContent = t.btnGuess;
     el['btn-new'].querySelector('.btn__top').textContent   = t.btnNew;
-    el['btn-lang'].querySelector('.btn__top').textContent  = t.btnLang;
     el.btnHint.querySelector('.btn__top').textContent      = t.btnHint;
     el.btnReveal.querySelector('.btn__top').textContent    = t.btnReveal;
     const status = el['status-text'].textContent;

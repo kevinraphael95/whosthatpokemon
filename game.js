@@ -187,47 +187,49 @@ const Game = (() => {
 
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
-    if (loading) return;
-    loading  = true;
-    hintStep = 0;
-    revealed = false;
-    current  = null; // ← FIX : bloque check() pendant tout le chargement
+      if (loading) return;
+      loading  = true;
+      hintStep = 0;
+      revealed = false;
+      current  = null;
 
-    const screen = el['screen'];
+      const screen = el['screen'];
 
-    await exitScreen();
+      await exitScreen();
 
-    screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
-    resetImgStyle();
-    el['type-bar'].innerHTML           = '';
-    el['pokemon-name'].textContent     = '';
-    el['pokemon-name'].classList.remove('correct');
-    el['status-text'].textContent      = T[lang].statusLoad;
-    el['guess-input'].value            = '';
-    el['guess-input'].classList.remove('shake');
+      // Reset classes mais PAS le style img (on garde le fade out visible)
+      screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
+      el['type-bar'].innerHTML           = '';
+      el['pokemon-name'].textContent     = '';
+      el['pokemon-name'].classList.remove('correct');
+      el['status-text'].textContent      = T[lang].statusLoad;
+      el['guess-input'].value            = '';
+      el['guess-input'].classList.remove('shake');
 
-    try {
-      // Capture next avant de l'effacer, pour éviter toute course
-      const pendingNext = next;
-      next = null;
-      const payload = pendingNext ? await pendingNext : await loadById(randomId());
-      current = payload; // ← current mis à jour APRÈS le chargement complet
+      try {
+        const pendingNext = next;
+        next = null;
+        const payload = pendingNext ? await pendingNext : await loadById(randomId());
+        current = payload;
 
-      el['pokemon-img'].src         = payload.imgUrl;
-      el['status-text'].textContent = T[lang].statusReady;
+        // Reset style img JUSTE AVANT d'affecter le nouveau src
+        resetImgStyle();
+        el['pokemon-img'].src         = payload.imgUrl;
+        el['status-text'].textContent = T[lang].statusReady;
 
-      prefetchNext();
+        prefetchNext();
 
-    } catch (err) {
-      console.error(err);
-      el['status-text'].textContent = 'ERREUR';
-      showToast('API ERROR – RETRY', 3000);
-      current = null;
+        } catch (err) {
+        console.error(err);
+        resetImgStyle();
+        el['status-text'].textContent = 'ERREUR';
+        showToast('API ERROR – RETRY', 3000);
+        current = null;
+      }
+
+      loading = false;
+      el['guess-input'].focus();
     }
-
-    loading = false;
-    el['guess-input'].focus();
-  }
 
   function randomId() {
     return Math.floor(Math.random() * 1025) + 1;

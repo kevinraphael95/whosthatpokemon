@@ -261,16 +261,18 @@ const Game = (() => {
   }
 
   // ── Check ─────────────────────────────────────────────────
-  function check() {
-    if (!current || revealed) return;
+function check() {
+  if (!current || revealed) return;
 
-    const guess = el['guess-input'].value.trim();
-    if (!guess) return;
+  const guess = el['guess-input'].value.trim().replace(/\s+/g, ' ');
+  if (!guess) return;
 
-    const names     = getNames();
-    const isCorrect =
-      normalize(guess) === normalize(names.en) ||
-      normalize(guess) === normalize(names.fr);
+  const names = getNames();
+  console.log('guess:', JSON.stringify(guess), 'en:', JSON.stringify(names.en), 'fr:', JSON.stringify(names.fr));
+
+  const isCorrect =
+    normalize(guess) === normalize(names.en) ||
+    normalize(guess) === normalize(names.fr);
 
     if (isCorrect) {
       score.correct++;

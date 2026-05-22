@@ -219,7 +219,8 @@ const Game = (() => {
       }
 
       loading = false;
-      el['guess-input'].focus();
+      // auto focus auto ouvrir le clavier en telephone
+      // el['guess-input'].focus();
     }
 
   function randomId() {

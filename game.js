@@ -527,6 +527,7 @@ const Game = (() => {
       revealPokemon(true);
       el['status-text'].textContent = T[lang].statusCorrect;
       showToast(T[lang].toastCorrect);
+      setTimeout(() => newPokemon(), 1500);
     } else {
       score.wrong++;
       playSound('wrong');

@@ -16,8 +16,34 @@ const Game = (() => {
 
   // ── Level system ──────────────────────────────────────────
   const LEVEL_THRESHOLD = 50;
-  let level     = 1;
-  let xp        = 0; // correct answers toward next level
+  const SAVE_KEY = 'wtp_save';
+
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      level        = s.level  || 1;
+      xp           = s.xp     || 0;
+      score.correct = s.correct || 0;
+      score.wrong   = s.wrong   || 0;
+      muted        = s.muted   || false;
+    } catch (e) {}
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        level, xp,
+        correct: score.correct,
+        wrong:   score.wrong,
+        muted,
+      }));
+    } catch (e) {}
+  }
+
+  let level = 1;
+  let xp    = 0;
 
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -279,16 +305,17 @@ const Game = (() => {
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {
     el['score-display'].innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
+    save();
   }
 
   // ── Level ─────────────────────────────────────────────────
   function updateLevelDisplay() {
     if (!el['level-display']) return;
     el['level-display'].textContent = T[lang].levelLabel(level, xp);
-    // XP bar
     if (el['xp-bar-fill']) {
       el['xp-bar-fill'].style.width = `${(xp / LEVEL_THRESHOLD) * 100}%`;
     }
+    save();
   }
 
   function addXP() {
@@ -324,6 +351,7 @@ const Game = (() => {
       el['btn-mute'].querySelector('.btn__top').textContent = muted ? '🔇' : '🔊';
       el['btn-mute'].classList.toggle('btn--muted', muted);
     }
+    save();
   }
 
   // ── Fetch + cache ─────────────────────────────────────────
@@ -543,8 +571,14 @@ const Game = (() => {
   // ── Init ──────────────────────────────────────────────────
   function init() {
     cacheDom();
+    loadSave();
     applyLang();
     updateLevelDisplay();
+    // Appliquer état mute sauvegardé
+    if (muted && el['btn-mute']) {
+      el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
+      el['btn-mute'].classList.add('btn--muted');
+    }
     preloadLevelUpSounds();
     newPokemon();
 

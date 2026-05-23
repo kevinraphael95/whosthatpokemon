@@ -12,6 +12,168 @@ const Game = (() => {
   let hintStep = 0;
   let revealed = false;
   let loading  = false;
+  let muted    = false;
+
+  // ── Level system ──────────────────────────────────────────
+  const LEVEL_THRESHOLD = 50;
+  let level     = 1;
+  let xp        = 0; // correct answers toward next level
+
+  // ── Audio ─────────────────────────────────────────────────
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx = null;
+
+  function getAudioCtx() {
+    if (!actx) actx = new AudioCtx();
+    return actx;
+  }
+
+  // Génère un son synthétique selon le type
+  function playSound(type) {
+    if (muted) return;
+    try {
+      const ctx = getAudioCtx();
+      const now = ctx.currentTime;
+
+      const configs = {
+        click: () => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now); osc.stop(now + 0.08);
+        },
+        correct: () => {
+          // Jingle montant type Pokémon
+          [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.32]].forEach(([freq, delay]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, now + delay);
+            gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
+            osc.start(now + delay); osc.stop(now + delay + 0.15);
+          });
+        },
+        wrong: () => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now); osc.stop(now + 0.22);
+        },
+        reveal: () => {
+          [[392, 0], [494, 0.1], [587, 0.2]].forEach(([freq, delay]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.14, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.18);
+            osc.start(now + delay); osc.stop(now + delay + 0.18);
+          });
+        },
+        hint: () => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(660, now);
+          osc.frequency.linearRampToValueAtTime(880, now + 0.12);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.start(now); osc.stop(now + 0.18);
+        },
+        newmon: () => {
+          // Swoosh descendant
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now); osc.stop(now + 0.28);
+        },
+        levelup: () => {
+          // Fanfare niveau up
+          const sequence = [
+            [523, 0, 0.12], [659, 0.13, 0.12], [784, 0.26, 0.12],
+            [1047, 0.39, 0.22], [784, 0.63, 0.1], [1047, 0.75, 0.35],
+          ];
+          sequence.forEach(([freq, delay, dur]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.18, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
+            osc.start(now + delay); osc.stop(now + delay + dur);
+          });
+        },
+        picross: () => {
+          // Jingle Pokémon Picross (99%)
+          const melody = [
+            [784,0,0.12],[880,0.13,0.12],[988,0.26,0.12],[1047,0.39,0.18],
+            [988,0.59,0.1],[880,0.71,0.1],[1047,0.83,0.28],
+          ];
+          melody.forEach(([freq, delay, dur]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
+            osc.start(now + delay); osc.stop(now + delay + dur);
+          });
+        },
+        bank: () => {
+          // Pokémon Bank (1%)
+          const melody = [
+            [523,0,0.15],[659,0.17,0.15],[784,0.34,0.15],
+            [1047,0.51,0.25],[784,0.78,0.12],[659,0.92,0.3],
+          ];
+          melody.forEach(([freq, delay, dur]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
+            osc.start(now + delay); osc.stop(now + delay + dur);
+          });
+        },
+      };
+
+      if (configs[type]) configs[type]();
+    } catch (e) {
+      console.warn('Audio error:', e);
+    }
+  }
+
+  function playLevelUpMusic() {
+    const rand = Math.random();
+    if (rand < 0.99) {
+      playSound('picross');
+    } else {
+      playSound('bank');
+    }
+  }
 
   // ── Translations ──────────────────────────────────────────
   const T = {
@@ -35,6 +197,8 @@ const Game = (() => {
       toastReveal  : '👁 RÉVÉLÉ',
       toastHint    : (h) => `💡 ${h}`,
       toastNoMore  : "CHARGE UN NOUVEAU POKÉMON D'ABORD",
+      toastLevelUp : (lvl) => `🏆 NIVEAU ${lvl} !`,
+      levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${LEVEL_THRESHOLD} XP`,
     },
     en: {
       inputLabel   : 'ENTER NAME',
@@ -56,6 +220,8 @@ const Game = (() => {
       toastReveal  : '👁 REVEALED',
       toastHint    : (h) => `💡 ${h}`,
       toastNoMore  : 'LOAD A NEW POKEMON FIRST',
+      toastLevelUp : (lvl) => `🏆 LEVEL ${lvl} !`,
+      levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${LEVEL_THRESHOLD} XP`,
     },
   };
 
@@ -67,7 +233,7 @@ const Game = (() => {
       'pokemon-img','screen','screen-overlay','screen-prompt',
       'type-bar','status-text','pokemon-name','score-display',
       'guess-input','input-label','btn-guess','btn-new','btn-lang',
-      'screen-label',
+      'screen-label','level-display','btn-mute','xp-bar-fill',
     ].forEach(id => { el[id] = document.getElementById(id); });
     el.btnHint   = document.querySelector('.btn--hint');
     el.btnReveal = document.querySelector('.btn--reveal');
@@ -103,23 +269,67 @@ const Game = (() => {
       el['status-text'].textContent = t.statusReady;
     }
     updateScore();
+    updateLevelDisplay();
   }
-   
+
   function toggleLang() {
+    playSound('click');
     lang = lang === 'fr' ? 'en' : 'fr';
     applyLang();
-  
-    // Met à jour le nom révélé si un pokemon est affiché
     if (revealed && current) {
       const names = getNames();
-      const displayName = lang === 'fr' ? names.fr : names.en;
-      el['pokemon-name'].textContent = displayName.toUpperCase();
+      el['pokemon-name'].textContent = (lang === 'fr' ? names.fr : names.en).toUpperCase();
     }
   }
 
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {
     el['score-display'].innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
+  }
+
+  // ── Level ─────────────────────────────────────────────────
+  function updateLevelDisplay() {
+    if (!el['level-display']) return;
+    el['level-display'].textContent = T[lang].levelLabel(level, xp);
+    // XP bar
+    if (el['xp-bar-fill']) {
+      el['xp-bar-fill'].style.width = `${(xp / LEVEL_THRESHOLD) * 100}%`;
+    }
+  }
+
+  function addXP() {
+    xp++;
+    if (xp >= LEVEL_THRESHOLD) {
+      xp = 0;
+      level++;
+      triggerLevelUp();
+    }
+    updateLevelDisplay();
+  }
+
+  function triggerLevelUp() {
+    playLevelUpMusic();
+    showToast(T[lang].toastLevelUp(level), 4000);
+
+    // Flash level badge
+    if (el['level-display']) {
+      el['level-display'].classList.add('level-up-flash');
+      setTimeout(() => el['level-display'].classList.remove('level-up-flash'), 1500);
+    }
+
+    // Screen flash gold
+    const screen = el['screen'];
+    screen.classList.add('screen--levelup');
+    setTimeout(() => screen.classList.remove('screen--levelup'), 1200);
+  }
+
+  // ── Mute ──────────────────────────────────────────────────
+  function toggleMute() {
+    muted = !muted;
+    if (el['btn-mute']) {
+      el['btn-mute'].querySelector('.btn__top').textContent = muted ? '🔇' : '🔊';
+      el['btn-mute'].classList.toggle('btn--muted', muted);
+    }
   }
 
   // ── Fetch + cache ─────────────────────────────────────────
@@ -156,7 +366,7 @@ const Game = (() => {
 
   // ── Prefetch ──────────────────────────────────────────────
   function prefetchNext() {
-    const id = Math.floor(Math.random() * 1025) + 1;
+    const id = randomId();
     next = loadById(id).catch(() => { next = null; });
   }
 
@@ -166,69 +376,65 @@ const Game = (() => {
   }
 
   async function exitScreen() {
-      const screen = el['screen'];
-      const img    = el['pokemon-img'];
+    const screen = el['screen'];
+    const img    = el['pokemon-img'];
+    img.style.animation = 'none';
+    img.style.filter    = 'brightness(0)';
+    screen.classList.add('screen--exit');
+    await sleep(300);
+  }
 
-      img.style.animation = 'none';
-      img.style.filter    = 'brightness(0)';
-      screen.classList.add('screen--exit');
-      await sleep(300);
-    }
-
-    function resetImgStyle() {
-      const img = el['pokemon-img'];
-      img.style.transition = '';
-      img.style.filter     = '';
-      img.style.opacity    = '';
-      img.style.transform  = '';
-    }
+  function resetImgStyle() {
+    const img = el['pokemon-img'];
+    img.style.transition = '';
+    img.style.filter     = '';
+    img.style.opacity    = '';
+    img.style.transform  = '';
+  }
 
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
-      if (loading) return;
-      loading  = true;
-      hintStep = 0;
-      revealed = false;
-      current  = null;
+    if (loading) return;
+    loading  = true;
+    hintStep = 0;
+    revealed = false;
+    current  = null;
 
-      const screen = el['screen'];
+    playSound('newmon');
 
-      await exitScreen();
+    const screen = el['screen'];
+    await exitScreen();
 
-      // Reset classes mais PAS le style img (on garde le fade out visible)
-      screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
-      el['type-bar'].innerHTML           = '';
-      el['pokemon-name'].textContent     = '';
-      el['pokemon-name'].classList.remove('correct');
-      el['status-text'].textContent      = T[lang].statusLoad;
-      el['guess-input'].value            = '';
-      el['guess-input'].classList.remove('shake');
+    screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit', 'screen--levelup');
+    el['type-bar'].innerHTML           = '';
+    el['pokemon-name'].textContent     = '';
+    el['pokemon-name'].classList.remove('correct');
+    el['status-text'].textContent      = T[lang].statusLoad;
+    el['guess-input'].value            = '';
+    el['guess-input'].classList.remove('shake');
 
-      try {
-        const pendingNext = next;
-        next = null;
-        const payload = pendingNext ? await pendingNext : await loadById(randomId());
-        current = payload;
+    try {
+      const pendingNext = next;
+      next = null;
+      const payload = pendingNext ? await pendingNext : await loadById(randomId());
+      current = payload;
 
-        // Reset style img JUSTE AVANT d'affecter le nouveau src
-        resetImgStyle();
-        el['pokemon-img'].src         = payload.imgUrl;
-        el['status-text'].textContent = T[lang].statusReady;
+      resetImgStyle();
+      el['pokemon-img'].src         = payload.imgUrl;
+      el['status-text'].textContent = T[lang].statusReady;
 
-        prefetchNext();
+      prefetchNext();
 
-        } catch (err) {
-        console.error(err);
-        resetImgStyle();
-        el['status-text'].textContent = 'ERREUR';
-        showToast('API ERROR – RETRY', 3000);
-        current = null;
-      }
-
-      loading = false;
-      // auto focus auto ouvrir le clavier en telephone
-      // el['guess-input'].focus();
+    } catch (err) {
+      console.error(err);
+      resetImgStyle();
+      el['status-text'].textContent = 'ERREUR';
+      showToast('API ERROR – RETRY', 3000);
+      current = null;
     }
+
+    loading = false;
+  }
 
   function randomId() {
     return Math.floor(Math.random() * 1025) + 1;
@@ -237,7 +443,7 @@ const Game = (() => {
   // ── Normalise ─────────────────────────────────────────────
   function normalize(s) {
     return s
-      .toLowerCase()           // ← DÉPLACE toLowerCase ICI, en premier
+      .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
@@ -268,11 +474,14 @@ const Game = (() => {
 
     if (isCorrect) {
       score.correct++;
+      addXP();
+      playSound('correct');
       revealPokemon(true);
       el['status-text'].textContent = T[lang].statusCorrect;
       showToast(T[lang].toastCorrect);
     } else {
       score.wrong++;
+      playSound('wrong');
       shake(el['guess-input']);
       el['status-text'].textContent = T[lang].statusWrong;
       showToast(T[lang].toastWrong, 1500);
@@ -291,6 +500,7 @@ const Game = (() => {
   // ── Reveal ────────────────────────────────────────────────
   function reveal() {
     if (!current || revealed) return;
+    playSound('reveal');
     revealPokemon(false);
     el['status-text'].textContent = T[lang].statusReveal;
     showToast(T[lang].toastReveal, 2000);
@@ -320,6 +530,7 @@ const Game = (() => {
   function hint() {
     if (!current || revealed) { showToast(T[lang].toastNoMore); return; }
 
+    playSound('hint');
     const names = getNames();
     const name  = lang === 'fr' ? names.fr : names.en;
     const steps = [1, 3, 5];
@@ -339,12 +550,15 @@ const Game = (() => {
   function init() {
     cacheDom();
     applyLang();
+    updateLevelDisplay();
     newPokemon();
-    el['btn-guess'].addEventListener('click', check);
+
+    el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
     el['btn-new'].addEventListener('click', newPokemon);
     el['btn-lang'].addEventListener('click', toggleLang);
     el.btnHint.addEventListener('click', hint);
     el.btnReveal.addEventListener('click', reveal);
+    if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
   }
 
   document.addEventListener('DOMContentLoaded', init);

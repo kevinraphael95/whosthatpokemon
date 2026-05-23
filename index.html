@@ -56,15 +56,15 @@
     <!-- RIGHT HALF -->
     <section class="pokedex__right">
       <div class="mini-screen" id="mini-screen">
-        <div class="mini-screen__status" id="status-text">PRÊT</div>
+        <div class="mini-screen__status" id="status-text" style="display:none"></div>
         <div class="mini-screen__name" id="pokemon-name"></div>
-        <div class="mini-screen__score">
-          <span id="score-display">✓ 0 &nbsp;✗ 0</span>
-        </div>
         <div class="xp-bar">
           <div class="xp-bar__fill" id="xp-bar-fill"></div>
         </div>
-        <div class="mini-screen__level" id="level-display">LVL 1  ·  0/50 XP</div>
+        <div class="mini-screen__bottom-row">
+          <div class="mini-screen__level" id="level-display">LVL 1  ·  0/50 XP</div>
+          <div class="mini-screen__score"><span id="score-display">✓ 0 &nbsp;✗ 0</span></div>
+        </div>
       </div>
       <div class="controls">
         <div class="input-group">

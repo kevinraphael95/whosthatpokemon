@@ -9,12 +9,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <div class="scanline"></div>
   <div class="noise"></div>
-
   <main class="pokedex">
-
     <!-- LEFT HALF -->
     <section class="pokedex__left">
       <div class="pokedex__lens-group">
@@ -28,7 +25,6 @@
           <div class="dot dot--green"></div>
         </div>
       </div>
-
       <div class="screen-wrapper">
         <div class="screen-label" id="screen-label">DISPLAY / AFFICHAGE</div>
         <div class="screen" id="screen">
@@ -44,34 +40,32 @@
             <span class="screen__prompt" id="screen-prompt">?</span>
           </div>
         </div>
-
         <div class="type-bar" id="type-bar"></div>
       </div>
-
       <div class="speaker">
         <div class="speaker__lines">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
       </div>
     </section>
-
     <!-- HINGE -->
     <div class="hinge">
       <div class="hinge__screw top"></div>
       <div class="hinge__screw bottom"></div>
     </div>
-
     <!-- RIGHT HALF -->
     <section class="pokedex__right">
-
       <div class="mini-screen" id="mini-screen">
         <div class="mini-screen__status" id="status-text">PRÊT</div>
         <div class="mini-screen__name" id="pokemon-name"></div>
         <div class="mini-screen__score">
           <span id="score-display">✓ 0 &nbsp;✗ 0</span>
         </div>
+        <div class="xp-bar">
+          <div class="xp-bar__fill" id="xp-bar-fill"></div>
+        </div>
+        <div class="mini-screen__level" id="level-display">LVL 1  ·  0/50 XP</div>
       </div>
-
       <div class="controls">
         <div class="input-group">
           <label class="input-label" id="input-label">ENTREZ LE NOM</label>
@@ -80,7 +74,6 @@
             <div class="input-cursor"></div>
           </div>
         </div>
-
         <div class="btn-row">
           <button class="btn btn--guess" id="btn-guess">
             <span class="btn__top">DEVINER</span>
@@ -88,12 +81,13 @@
           <button class="btn btn--lang" id="btn-lang">
             <span class="btn__top">FR / EN</span>
           </button>
+          <button class="btn btn--mute" id="btn-mute">
+            <span class="btn__top">🔊</span>
+          </button>
         </div>
-
         <button class="btn btn--new" id="btn-new">
           <span class="btn__top">— 🔄 NOUVEAU POKÉMON —</span>
         </button>
-
         <div class="hint-row">
           <button class="btn btn--hint">
             <span class="btn__top">INDICE</span>
@@ -103,7 +97,6 @@
           </button>
         </div>
       </div>
-
       <div class="dpad-area">
         <div class="dpad">
           <div class="dpad__h"></div>
@@ -115,10 +108,8 @@
           <button class="circle-btn" id="circle-b">B</button>
         </div>
       </div>
-
     </section>
   </main>
-
   <script src="game.js"></script>
 </body>
 </html>

@@ -328,9 +328,35 @@ const Game = (() => {
     updateLevelDisplay();
   }
 
+  // ── Level up popup ────────────────────────────────────────
+  let popupEl = null;
+
+  function showLevelUpPopup(lvl) {
+    if (!popupEl) {
+      popupEl = document.createElement('div');
+      popupEl.className = 'levelup-popup';
+      popupEl.innerHTML = `
+        <div class="levelup-popup__inner">
+          <div class="levelup-popup__title" id="popup-title"></div>
+          <div class="levelup-popup__level" id="popup-level"></div>
+          <button class="levelup-popup__close" id="popup-close">OK</button>
+        </div>`;
+      document.body.appendChild(popupEl);
+      document.getElementById('popup-close').addEventListener('click', () => {
+        popupEl.classList.remove('show');
+      });
+    }
+    const title = lang === 'fr' ? 'NIVEAU SUPÉRIEUR' : 'LEVEL UP';
+    const sub   = lang === 'fr' ? `NIVEAU ${lvl} ATTEINT` : `LEVEL ${lvl} REACHED`;
+    document.getElementById('popup-title').textContent = title;
+    document.getElementById('popup-level').textContent = sub;
+    popupEl.classList.add('show');
+    setTimeout(() => popupEl && popupEl.classList.remove('show'), 6000);
+  }
+
   function triggerLevelUp() {
     playLevelUpMusic();
-    showToast(T[lang].toastLevelUp(level), 4000);
+    showLevelUpPopup(level);
 
     // Flash level badge
     if (el['level-display']) {

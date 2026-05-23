@@ -28,6 +28,37 @@ const Game = (() => {
     return actx;
   }
 
+  // Précharge les musiques level up
+  const LEVELUP_SOUNDS = {
+    picross: 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-picross.mp3',
+    bank:    'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-bank.mp3',
+  };
+  const audioBuffers = {};
+
+  async function preloadLevelUpSounds() {
+    const ctx = getAudioCtx();
+    for (const [key, url] of Object.entries(LEVELUP_SOUNDS)) {
+      try {
+        const res = await fetch(url);
+        const arrayBuffer = await res.arrayBuffer();
+        audioBuffers[key] = await ctx.decodeAudioData(arrayBuffer);
+      } catch (e) {
+        console.warn(`Impossible de charger ${key}:`, e);
+      }
+    }
+  }
+
+  function playBuffer(key) {
+    if (muted) return;
+    const ctx = getAudioCtx();
+    const buf = audioBuffers[key];
+    if (!buf) return;
+    const source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.connect(ctx.destination);
+    source.start(0);
+  }
+
   // Génère un son synthétique selon le type
   function playSound(type) {
     if (muted) return;
@@ -124,40 +155,6 @@ const Game = (() => {
             osc.start(now + delay); osc.stop(now + delay + dur);
           });
         },
-        picross: () => {
-          // Jingle Pokémon Picross (99%)
-          const melody = [
-            [784,0,0.12],[880,0.13,0.12],[988,0.26,0.12],[1047,0.39,0.18],
-            [988,0.59,0.1],[880,0.71,0.1],[1047,0.83,0.28],
-          ];
-          melody.forEach(([freq, delay, dur]) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'square';
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.15, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
-            osc.start(now + delay); osc.stop(now + delay + dur);
-          });
-        },
-        bank: () => {
-          // Pokémon Bank (1%)
-          const melody = [
-            [523,0,0.15],[659,0.17,0.15],[784,0.34,0.15],
-            [1047,0.51,0.25],[784,0.78,0.12],[659,0.92,0.3],
-          ];
-          melody.forEach(([freq, delay, dur]) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'triangle';
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.15, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
-            osc.start(now + delay); osc.stop(now + delay + dur);
-          });
-        },
       };
 
       if (configs[type]) configs[type]();
@@ -167,12 +164,9 @@ const Game = (() => {
   }
 
   function playLevelUpMusic() {
-    const rand = Math.random();
-    if (rand < 0.99) {
-      playSound('picross');
-    } else {
-      playSound('bank');
-    }
+    if (muted) return;
+    const key = Math.random() < 0.99 ? 'picross' : 'bank';
+    playBuffer(key);
   }
 
   // ── Translations ──────────────────────────────────────────
@@ -551,6 +545,7 @@ const Game = (() => {
     cacheDom();
     applyLang();
     updateLevelDisplay();
+    preloadLevelUpSounds();
     newPokemon();
 
     el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });

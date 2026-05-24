@@ -387,14 +387,17 @@ const Game = (() => {
     updateScore();
     updateLevelDisplay();
   }
+   
   function toggleLang() {
     playSound('ui');
     lang = lang === 'fr' ? 'en' : 'fr';
-    applyLang();
-    if (revealed && current) {
-      const names = getNames();
-      el['pokemon-name'].textContent = (lang === 'fr' ? names.fr : names.en).toUpperCase();
-    }
+    requestAnimationFrame(() => {
+      applyLang();
+      if (revealed && current) {
+        const names = getNames();
+        el['pokemon-name'].textContent = (lang === 'fr' ? names.fr : names.en).toUpperCase();
+      }
+    });
   }
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {

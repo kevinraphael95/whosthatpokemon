@@ -198,9 +198,9 @@ body::before {
   font-family: var(--font-pixel);
   font-size: 6px;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #000000;
   padding-left: 4px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  text-shadow: none;
 }
 .screen {
   flex: 1;
@@ -543,9 +543,9 @@ body::before {
   font-family: var(--font-pixel);
   font-size: 7px;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #000000;
   padding-left: 2px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  text-shadow: none;
 }
 .input-wrap { position: relative; }
 

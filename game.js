@@ -3,6 +3,9 @@
    ============================================================ */
 const Game = (() => {
   // ── State ─────────────────────────────────────────────────
+  let lastPokemonId = null;
+  let wasRevealed = false;
+   
   let current  = null;
   let next     = null;
   let lang     = 'fr';
@@ -11,6 +14,10 @@ const Game = (() => {
   let revealed = false;
   let loading  = false;
   let muted    = false;
+
+  let level = 1;
+  let xp    = 0;   
+   
   // ── Level system ──────────────────────────────────────────
   const LEVEL_THRESHOLD = 50;
   const SAVE_KEY = 'wtp_save';
@@ -24,6 +31,8 @@ const Game = (() => {
       score.correct = s.correct || 0;
       score.wrong   = s.wrong   || 0;
       muted        = s.muted   || false;
+      lastPokemonId = s.lastPokemonId || null;
+      wasRevealed = s.wasRevealed || false;
     } catch (e) {}
   }
   function save() {
@@ -33,11 +42,11 @@ const Game = (() => {
         correct: score.correct,
         wrong:   score.wrong,
         muted,
+        lastPokemonId: current ? current.data.id : null,
+        wasRevealed: revealed         
       }));
     } catch (e) {}
   }
-  let level = 1;
-  let xp    = 0;
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let actx = null;
@@ -441,6 +450,9 @@ const Game = (() => {
     hintStep = 0;
     revealed = false;
     current  = null;
+    lastPokemonId = null; 
+    wasRevealed = false;
+    save();     
     playSound('newmon');
     const screen = el['screen'];
     await exitScreen();
@@ -560,24 +572,45 @@ const Game = (() => {
   // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
   // ── Init ──────────────────────────────────────────────────
-  function init() {
-    cacheDom();
-    loadSave();
-    applyLang();
-    updateLevelDisplay();
-    if (muted && el['btn-mute']) {
-      el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
-      el['btn-mute'].classList.add('btn--muted');
+    async function init() { // J'ai ajouté async ici
+      cacheDom();
+      loadSave();
+      applyLang();
+      updateLevelDisplay();
+      if (muted && el['btn-mute']) {
+        el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
+        el['btn-mute'].classList.add('btn--muted');
+      }
+      preloadLevelUpSounds();
+
+      // ICI : Si on a un ID, on le charge, sinon on en tire un nouveau
+      if (lastPokemonId) {
+        try {
+          const payload = await loadById(lastPokemonId);
+          current = payload;
+          resetImgStyle();
+          el['pokemon-img'].src = payload.imgUrl;
+          el['status-text'].textContent = T[lang].statusReady;
+        
+          // Si le Pokémon était déjà révélé, on met l'état à jour
+          if (wasRevealed) {
+            revealPokemon(false);
+          }
+          prefetchNext();
+        } catch (e) {
+          newPokemon();
+        }
+      } else {
+        newPokemon();
+      }
+
+      el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
+      el['btn-new'].addEventListener('click', newPokemon);
+      el['btn-lang'].addEventListener('click', toggleLang);
+      el.btnHint.addEventListener('click', hint);
+      el.btnReveal.addEventListener('click', reveal);
+      if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
     }
-    preloadLevelUpSounds();
-    newPokemon();
-    el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
-    el['btn-new'].addEventListener('click', newPokemon);
-    el['btn-lang'].addEventListener('click', toggleLang);
-    el.btnHint.addEventListener('click', hint);
-    el.btnReveal.addEventListener('click', reveal);
-    if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
-  }
   document.addEventListener('DOMContentLoaded', init);
   return { newPokemon, toggleLang, check, reveal, hint };
 })();

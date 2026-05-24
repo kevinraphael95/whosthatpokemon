@@ -52,20 +52,27 @@ const Game = (() => {
       console.error("Erreur sauvegarde :", e);
     }
   }
+
+   
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let actx = null;
+
   function getAudioCtx() {
     if (!actx) actx = new AudioCtx();
     return actx;
   }
+
   const LEVELUP_SOUNDS = {
     picross: 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-picross.mp3',
     bank:    'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-bank.mp3',
   };
+
   const audioBuffers = {};
+
   async function preloadLevelUpSounds() {
     const ctx = getAudioCtx();
+
     for (const [key, url] of Object.entries(LEVELUP_SOUNDS)) {
       try {
         const res = await fetch(url);
@@ -76,138 +83,218 @@ const Game = (() => {
       }
     }
   }
+
   function playBuffer(key) {
     if (muted) return;
+
     const ctx = getAudioCtx();
     const buf = audioBuffers[key];
     if (!buf) return;
+
     const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+
+    gain.gain.value = 0.6;
+
     source.buffer = buf;
-    source.connect(ctx.destination);
+    source.connect(gain);
+    gain.connect(ctx.destination);
+
     source.start(0);
   }
+
   function playSound(type) {
     if (muted) return;
+
     try {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
+
       const configs = {
-        
+
         ui: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-      
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.linearRampToValueAtTime(620, now + 0.08);
+
+          gain.gain.setValueAtTime(MASTER_VOLUME * 0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
           osc.connect(gain);
           gain.connect(ctx.destination);
-      
-          osc.type = 'triangle';
-      
-          osc.frequency.setValueAtTime(700, now);
-          osc.frequency.linearRampToValueAtTime(950, now + 0.05);
-      
-          gain.gain.setValueAtTime(MASTER_VOLUME, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-      
+
           osc.start(now);
-          osc.stop(now + 0.07);
+          osc.stop(now + 0.12);
         },
-         
+
         click: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(880, now);
-          osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
-          gain.gain.setValueAtTime(MASTER_VOLUME, now);
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(500, now + 0.06);
+
+          gain.gain.setValueAtTime(MASTER_VOLUME * 0.4, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-          osc.start(now); osc.stop(now + 0.08);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.08);
         },
+
         correct: () => {
-          [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.32]].forEach(([freq, delay]) => {
+          const notes = [523, 659, 784];
+
+          notes.forEach((freq, i) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'square';
+
+            osc.type = 'sine';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0, now + delay);
-            gain.gain.linearRampToValueAtTime(MASTER_VOLUME, now + delay + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
-            osc.start(now + delay); osc.stop(now + delay + 0.15);
+
+            const t = now + i * 0.12;
+
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(MASTER_VOLUME * 0.6, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(t);
+            osc.stop(t + 0.2);
           });
         },
+
         wrong: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
-          gain.gain.setValueAtTime(MASTER_VOLUME, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-          osc.start(now); osc.stop(now + 0.22);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+
+          gain.gain.setValueAtTime(MASTER_VOLUME * 0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.3);
         },
+
         reveal: () => {
-          [[392, 0], [494, 0.1], [587, 0.2]].forEach(([freq, delay]) => {
+          const chords = [
+            [392, 0],
+            [494, 0.12],
+            [587, 0.24],
+          ];
+
+          chords.forEach(([freq, delay]) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
+
             osc.type = 'triangle';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(MASTER_VOLUME, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.18);
-            osc.start(now + delay); osc.stop(now + delay + 0.18);
+
+            const t = now + delay;
+
+            gain.gain.setValueAtTime(MASTER_VOLUME * 0.5, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(t);
+            osc.stop(t + 0.25);
           });
         },
+
         hint: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
+
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(660, now);
-          osc.frequency.linearRampToValueAtTime(880, now + 0.12);
-          gain.gain.setValueAtTime(MASTER_VOLUME, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-          osc.start(now); osc.stop(now + 0.18);
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.linearRampToValueAtTime(740, now + 0.15);
+
+          gain.gain.setValueAtTime(MASTER_VOLUME * 0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.2);
         },
+
         newmon: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
+
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(600, now);
-          osc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
-          gain.gain.setValueAtTime(MASTER_VOLUME, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-          osc.start(now); osc.stop(now + 0.28);
+          osc.frequency.setValueAtTime(500, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.35);
+
+          gain.gain.setValueAtTime(MASTER_VOLUME * 0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.4);
         },
+
         levelup: () => {
-          const sequence = [
-            [523, 0, 0.12], [659, 0.13, 0.12], [784, 0.26, 0.12],
-            [1047, 0.39, 0.22], [784, 0.63, 0.1], [1047, 0.75, 0.35],
+          const progression = [
+            [523, 0],
+            [659, 0.15],
+            [784, 0.3],
+            [988, 0.5],
+            [784, 0.75],
           ];
-          sequence.forEach(([freq, delay, dur]) => {
+
+          progression.forEach(([freq, delay]) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'square';
+
+            osc.type = 'triangle';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(MASTER_VOLUME, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
-            osc.start(now + delay); osc.stop(now + delay + dur);
+
+            const t = now + delay;
+
+            gain.gain.setValueAtTime(MASTER_VOLUME * 0.6, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(t);
+            osc.stop(t + 0.5);
           });
         },
       };
+
       if (configs[type]) configs[type]();
     } catch (e) {
       console.warn('Audio error:', e);
     }
   }
+
   function playLevelUpMusic() {
     if (muted) return;
     const key = Math.random() < 0.99 ? 'picross' : 'bank';
     playBuffer(key);
   }
+   
   // ── Type translations ──────────────────────────────────────
   const TYPE_FR = {
     normal:   'NORMAL',

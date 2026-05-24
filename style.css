@@ -89,7 +89,7 @@ body::before {
   align-items: stretch;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.95));
+  will-change: transform;
   animation: floatIn 0.8s cubic-bezier(.22, 1, .36, 1) both;
 }
 @keyframes floatIn {

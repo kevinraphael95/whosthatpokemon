@@ -575,46 +575,54 @@ const Game = (() => {
   // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
   // ── Init ──────────────────────────────────────────────────
+
     async function init() {
         cacheDom();
         loadSave();
         applyLang();
         updateLevelDisplay();
+       
         if (muted && el['btn-mute']) {
-          el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
-          el['btn-mute'].classList.add('btn--muted');
+            el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
+            el['btn-mute'].classList.add('btn--muted');
         }
         preloadLevelUpSounds();
    
+        // ICI : Vérification stricte
         if (lastPokemonId) {
-          try {
-            const payload = await loadById(lastPokemonId);
-            current = payload;
-            el['pokemon-img'].src = payload.imgUrl;
-            revealed = wasRevealed;
-            if (revealed) {
-              revealPokemon(false);
-            } else {
-              resetImgStyle();
-              el['pokemon-img'].style.filter = 'brightness(0)';
-              el['status-text'].textContent = T[lang].statusReady;
+            try {
+                const payload = await loadById(lastPokemonId);
+                current = payload;
+                el['pokemon-img'].src = payload.imgUrl;
+               
+                // On restaure l'état de la variable globale 'revealed'
+                revealed = wasRevealed;
+               
+                if (revealed) {
+                    revealPokemon(false);
+                } else {
+                    // On prépare l'affichage sans changer de Pokémon
+                    resetImgStyle();
+                    el['pokemon-img'].style.filter = 'brightness(0)';
+                    el['status-text'].textContent = T[lang].statusReady;
+                }
+                prefetchNext();
+            } catch (e) {
+                console.error("Erreur, on tente de générer un nouveau.");
+                newPokemon();
             }
-            prefetchNext();
-          } catch (e) {
-            console.error("Erreur chargement session, on génère un nouveau.");
-            newPokemon();
-          }
         } else {
-          newPokemon();
+            // Seulement s'il n'y a PAS de sauvegarde, on en génère un nouveau
+            newPokemon();
         }
-
-
-      el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
-      el['btn-new'].addEventListener('click', newPokemon);
-      el['btn-lang'].addEventListener('click', toggleLang);
-      el.btnHint.addEventListener('click', hint);
-      el.btnReveal.addEventListener('click', reveal);
-      if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
+   
+        // Écouteurs d'événements
+        el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
+        el['btn-new'].addEventListener('click', newPokemon);
+        el['btn-lang'].addEventListener('click', toggleLang);
+        el.btnHint.addEventListener('click', hint);
+        el.btnReveal.addEventListener('click', reveal);
+        if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
     }
   document.addEventListener('DOMContentLoaded', init);
   return { newPokemon, toggleLang, check, reveal, hint };

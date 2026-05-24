@@ -850,15 +850,15 @@ body::before {
 
   /* ── Écran principal — fond clair pour contraste max ── */
   .screen-label { display: none; }
+
   .screen {
     min-height: 260px;
-    background: var(--screen-mobile-bg);
   }
 
   /* ── Image Pokémon — silhouette noire sur fond clair ── */
   #pokemon-img {
     max-height: 230px;
-    filter: brightness(0);
+    filter: brightness(0) drop-shadow(0 0 8px white);
   }
   .screen--revealed #pokemon-img {
     filter: brightness(1.05) contrast(1.05) saturate(1.1);

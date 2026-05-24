@@ -427,6 +427,8 @@ body::before {
   letter-spacing: 2px;
   position: relative;
   z-index: 1;
+  height: 14px;
+  overflow: hidden;
   transition: color 0.3s;
 }
 .mini-screen__name {

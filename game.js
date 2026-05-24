@@ -35,18 +35,19 @@ const Game = (() => {
       wasRevealed = s.wasRevealed || false;
     } catch (e) {}
   }
+   
   function save() {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({
-        level, xp,
-        correct: score.correct,
-        wrong:   score.wrong,
-        muted,
-        lastPokemonId: current ? current.data.id : null,
-        wasRevealed: revealed         
-      }));
-    } catch (e) {}
-  }
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+          level, xp,
+          correct: score.correct,
+          wrong:   score.wrong,
+          muted,
+          lastPokemonId: current ? current.data.id : null,
+          wasRevealed: revealed // Ceci enregistre si le Pokémon actuel est révélé ou non
+        }));
+      } catch (e) {}
+    }
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let actx = null;

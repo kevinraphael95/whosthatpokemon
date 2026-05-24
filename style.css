@@ -244,6 +244,16 @@ body::before {
 }
 
 
+/* ── Logo ─────────────────────────────────────────────────── */
+.wtp-logo {
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+
 /* ── Image Pokémon ─────────────────────────────────────────── */
 #pokemon-img {
   max-width: 85%; max-height: 85%;
@@ -790,6 +800,7 @@ body::before {
 
   .lens { width: 44px; height: 44px; }
   .dot  { width: 10px; height: 10px; }
+  .wtp-logo { max-height: 50px; }
 
   .screen-label { display: none; }
   .screen { min-height: 200px; }

@@ -439,7 +439,8 @@ body::before {
   text-shadow: none;
   position: relative;
   z-index: 1;
-  min-height: 20px;
+  height: 36px;
+  min-height: unset;
   text-transform: uppercase;
   letter-spacing: 2px;
   white-space: nowrap;

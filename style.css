@@ -246,11 +246,13 @@ body::before {
 
 /* ── Logo ─────────────────────────────────────────────────── */
 .wtp-logo {
-  width: 100%;
-  max-height: 80px;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 140px;        /* ajuste selon ta préférence */
+  max-height: 60px;
   object-fit: contain;
-  position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 

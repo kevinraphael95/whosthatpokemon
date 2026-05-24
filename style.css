@@ -429,7 +429,7 @@ body::before {
 
 /* ── Mini écran ────────────────────────────────────────────── */
 .mini-screen {
-  background: var(--screen-dark);
+  background: #6a8f0a;
   border: 4px solid #111;
   border-radius: var(--radius-md);
   padding: 10px 14px;
@@ -847,7 +847,7 @@ body::before {
   .screen-label { display: none; }
   .screen {
     min-height: 260px;
-    background: #8bac0f;
+    background: #6a8f0a;
   }
 
   /* ── Image Pokémon ── */

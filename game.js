@@ -295,31 +295,7 @@ const Game = (() => {
     playBuffer(key);
   }
    
-  // ── Type translations ──────────────────────────────────────
-  const TYPE_FR = {
-    normal:   'NORMAL',
-    fire:     'FEU',
-    water:    'EAU',
-    electric: 'ÉLECTRIK',
-    grass:    'PLANTE',
-    ice:      'GLACE',
-    fighting: 'COMBAT',
-    poison:   'POISON',
-    ground:   'SOL',
-    flying:   'VOL',
-    psychic:  'PSY',
-    bug:      'INSECTE',
-    rock:     'ROCHE',
-    ghost:    'SPECTRE',
-    dragon:   'DRAGON',
-    dark:     'TÉNÈBRES',
-    steel:    'ACIER',
-    fairy:    'FÉE',
-  };
-  function getTypeName(apiName) {
-    if (lang === 'fr') return TYPE_FR[apiName] || apiName.toUpperCase();
-    return apiName.toUpperCase();
-  }
+ 
   // ── Translations ──────────────────────────────────────────
   const T = {
     fr: {
@@ -374,7 +350,7 @@ const Game = (() => {
   function cacheDom() {
     [
       'pokemon-img','screen','screen-overlay','screen-prompt',
-      'type-bar','status-text','pokemon-name','score-display',
+      'status-text','pokemon-name','score-display',
       'guess-input','input-label','btn-guess','btn-new','btn-lang',
       'screen-label','level-display','btn-mute','xp-bar-fill',
     ].forEach(id => { el[id] = document.getElementById(id); });
@@ -410,8 +386,6 @@ const Game = (() => {
     }
     updateScore();
     updateLevelDisplay();
-    // Mettre à jour les badges de type si déjà révélé
-    if (revealed && current) refreshTypeBadges();
   }
   function toggleLang() {
     playSound('ui');
@@ -545,16 +519,7 @@ const Game = (() => {
     img.style.opacity    = '';
     img.style.transform  = '';
   }
-  // ── Type badges ───────────────────────────────────────────
-  function refreshTypeBadges() {
-    if (!current) return;
-    el['type-bar'].innerHTML = current.data.types
-      .map((t, i) =>
-        `<span class="type-badge type-${t.type.name}" style="animation-delay:${i * 0.15}s">
-           ${getTypeName(t.type.name)}
-         </span>`
-      ).join('');
-  }
+
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
       if (loading) return;
@@ -565,7 +530,6 @@ const Game = (() => {
       await exitScreen();
     
       screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit', 'screen--levelup');
-      el['type-bar'].innerHTML = '';
       el['pokemon-name'].textContent = '';
       el['pokemon-name'].classList.remove('correct');
       el['status-text'].textContent = T[lang].statusLoad;
@@ -673,7 +637,6 @@ const Game = (() => {
     const displayName = lang === 'fr' ? names.fr : names.en;
     el['pokemon-name'].textContent = displayName.toUpperCase();
     if (correct) el['pokemon-name'].classList.add('correct');
-    refreshTypeBadges();
     save();
   }
   // ── Hint ──────────────────────────────────────────────────

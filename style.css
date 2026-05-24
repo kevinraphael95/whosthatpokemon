@@ -864,7 +864,7 @@ body::before {
 
   /* ── Types ── */
   .type-badge { font-size: 7px; padding: 4px 10px; }
-  .type-bar   { min-height: 10px; gap: 6px; }
+  .type-bar   { min-height: 32px; height: 32px; overflow: hidden; gap: 6px; }
 
   .speaker { display: none; }
   .hinge   { display: none; }

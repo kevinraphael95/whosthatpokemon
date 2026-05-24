@@ -399,7 +399,6 @@ const Game = (() => {
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {
     el['score-display'].innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
-    save();
   }
   // ── Level ─────────────────────────────────────────────────
   function updateLevelDisplay() {
@@ -408,7 +407,7 @@ const Game = (() => {
     if (el['xp-bar-fill']) {
       el['xp-bar-fill'].style.width = `${(xp / LEVEL_THRESHOLD) * 100}%`;
     }
-    save();
+
   }
   function addXP() {
     xp++;

@@ -87,7 +87,10 @@ body::before {
 .pokedex {
   display: flex;
   align-items: stretch;
-  position: relative;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.95));
   animation: floatIn 0.8s cubic-bezier(.22, 1, .36, 1) both;

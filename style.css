@@ -248,8 +248,8 @@ body::before {
 .wtp-logo {
   position: absolute;
   top: 12px;
-  left: 12px;
-  width: 140px;        /* ajuste selon ta préférence */
+  right: 12px;
+  width: 140px;
   max-height: 60px;
   object-fit: contain;
   z-index: 3;

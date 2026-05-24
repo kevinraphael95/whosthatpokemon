@@ -14,7 +14,7 @@ const Game = (() => {
   let revealed = false;
   let loading  = false;
   let muted    = false;
-  const MASTER_VOLUME = 0.20;
+  const MASTER_VOLUME = 0.50;
   let level = 1;
   let xp    = 0;   
    

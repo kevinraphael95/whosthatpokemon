@@ -803,7 +803,7 @@ body::before {
 
   .lens { width: 44px; height: 44px; }
   .dot  { width: 10px; height: 10px; }
-  .wtp-logo { max-height: 50px; }
+  .wtp-logo { max-height: 50px; margin-bottom: 8px; }
 
   .screen-label { display: none; }
   .screen { min-height: 200px; }

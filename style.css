@@ -845,13 +845,15 @@ body::before {
 
   /* ── Écran principal ── */
   .screen-label { display: none; }
-  .screen { min-height: 260px; }
+  .screen {
+    min-height: 260px;
+    background: #8bac0f;
+  }
 
-  /* ── Image Pokémon — meilleur contraste mobile ── */
+  /* ── Image Pokémon ── */
   #pokemon-img {
     max-height: 230px;
-    /* Silhouette plus noire sur fond sombre */
-    filter: brightness(0) contrast(1.2);
+    filter: brightness(0);
   }
   .screen--revealed #pokemon-img {
     filter: brightness(1.05) contrast(1.05) saturate(1.1);
@@ -878,7 +880,7 @@ body::before {
   }
   .pokedex__right::before { content: none; }
 
-  /* ── Mini écran — texte plus lisible ── */
+  /* ── Mini écran ── */
   .mini-screen { min-height: 64px; padding: 10px 14px; }
   .mini-screen__status { font-size: 8px; color: var(--screen-light); }
   .mini-screen__name   { font-size: 14px; }
@@ -889,7 +891,6 @@ body::before {
   #guess-input {
     font-size: 11px;
     padding: 14px 14px;
-    /* Contraste renforcé sur mobile */
     color: #b5dc1a;
     border-color: #444;
   }

@@ -446,42 +446,45 @@ const Game = (() => {
   }
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
-    if (loading) return;
-    loading  = true;
-    hintStep = 0;
-    revealed = false;
-    current  = null;
-    lastPokemonId = null; 
-    wasRevealed = false;
-    save();     
-    playSound('newmon');
-    const screen = el['screen'];
-    await exitScreen();
-    screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit', 'screen--levelup');
-    el['type-bar'].innerHTML           = '';
-    el['pokemon-name'].textContent     = '';
-    el['pokemon-name'].classList.remove('correct');
-    el['status-text'].textContent      = T[lang].statusLoad;
-    el['guess-input'].value            = '';
-    el['guess-input'].classList.remove('shake');
-    try {
-      const pendingNext = next;
-      next = null;
-      const payload = pendingNext ? await pendingNext : await loadById(randomId());
-      current = payload;
-      resetImgStyle();
-      el['pokemon-img'].src         = payload.imgUrl;
-      el['status-text'].textContent = T[lang].statusReady;
-      prefetchNext();
-    } catch (err) {
-      console.error(err);
-      resetImgStyle();
-      el['status-text'].textContent = 'ERREUR';
-      showToast('API ERROR – RETRY', 3000);
-      current = null;
+      if (loading) return;
+      loading = true;
+      hintStep = 0;
+    
+      // On ne réinitialise plus les variables ici pour éviter de perdre le Pokémon actuel trop tôt
+    
+      const screen = el['screen'];
+      await exitScreen();
+    
+      screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit', 'screen--levelup');
+      el['type-bar'].innerHTML = '';
+      el['pokemon-name'].textContent = '';
+      el['pokemon-name'].classList.remove('correct');
+      el['status-text'].textContent = T[lang].statusLoad;
+      el['guess-input'].value = '';
+      el['guess-input'].classList.remove('shake');
+    
+      try {
+        const pendingNext = next;
+        next = null;
+        const payload = pendingNext ? await pendingNext : await loadById(randomId());
+      
+        current = payload;
+        lastPokemonId = payload.data.id; // Mise à jour de l'ID ici
+        revealed = false;                // On réinitialise l'état pour le nouveau
+        save();                          // Sauvegarde APRÈS avoir chargé les nouvelles données
+      
+        resetImgStyle();
+        el['pokemon-img'].src = payload.imgUrl;
+        el['status-text'].textContent = T[lang].statusReady;
+        prefetchNext();
+      } catch (err) {
+        console.error(err);
+        resetImgStyle();
+        el['status-text'].textContent = 'ERREUR';
+        showToast('API ERROR – RETRY', 3000);
+      }
+      loading = false;
     }
-    loading = false;
-  }
   function randomId() {
     return Math.floor(Math.random() * 1025) + 1;
   }
@@ -585,25 +588,29 @@ const Game = (() => {
       preloadLevelUpSounds();
 
       // ICI : Si on a un ID, on le charge, sinon on en tire un nouveau
-      if (lastPokemonId) {
-        try {
-          const payload = await loadById(lastPokemonId);
-          current = payload;
-          resetImgStyle();
-          el['pokemon-img'].src = payload.imgUrl;
-          el['status-text'].textContent = T[lang].statusReady;
-        
-          // Si le Pokémon était déjà révélé, on met l'état à jour
-          if (wasRevealed) {
-            revealPokemon(false);
-          }
-          prefetchNext();
-        } catch (e) {
-          newPokemon();
-        }
-      } else {
-        newPokemon();
-      }
+            if (lastPokemonId) {
+              try {
+                const payload = await loadById(lastPokemonId);
+                current = payload;
+                el['pokemon-img'].src = payload.imgUrl;
+                
+                // On force la variable revealed à l'état sauvegardé
+                revealed = wasRevealed;
+                
+                if (revealed) {
+                  revealPokemon(false);
+                } else {
+                  resetImgStyle();
+                  el['pokemon-img'].style.filter = 'brightness(0)';
+                  el['status-text'].textContent = T[lang].statusReady;
+                }
+                prefetchNext();
+              } catch (e) {
+                newPokemon();
+              }
+            } else {
+              newPokemon();
+            }
 
       el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
       el['btn-new'].addEventListener('click', newPokemon);

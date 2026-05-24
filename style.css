@@ -259,7 +259,7 @@ body::before {
 
 /* ── Image Pokémon ─────────────────────────────────────────── */
 #pokemon-img {
-  max-width: 85%; max-height: 50%;
+  max-width: 85%; max-height: 85%;
   object-fit: contain;
   filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   image-rendering: pixelated;

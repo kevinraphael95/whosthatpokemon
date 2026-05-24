@@ -92,6 +92,26 @@ const Game = (() => {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
       const configs = {
+        
+        ui: () => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+      
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+      
+          osc.type = 'triangle';
+      
+          osc.frequency.setValueAtTime(700, now);
+          osc.frequency.linearRampToValueAtTime(950, now + 0.05);
+      
+          gain.gain.setValueAtTime(MASTER_VOLUME, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      
+          osc.start(now);
+          osc.stop(now + 0.07);
+        },
+         
         click: () => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -307,7 +327,7 @@ const Game = (() => {
     if (revealed && current) refreshTypeBadges();
   }
   function toggleLang() {
-    playSound('click');
+    playSound('ui');
     lang = lang === 'fr' ? 'en' : 'fr';
     applyLang();
     if (revealed && current) {
@@ -543,7 +563,14 @@ const Game = (() => {
   }
   // ── Reveal ────────────────────────────────────────────────
   function reveal() {
-    if (!current || revealed) return;
+    if (!current) return;
+
+    if (revealed) {
+      playSound('ui');
+      showToast(T[lang].toastNoMore);
+      return;
+    }
+
     playSound('reveal');
     revealPokemon(false);
     el['status-text'].textContent = T[lang].statusReveal;
@@ -560,18 +587,31 @@ const Game = (() => {
     el['pokemon-name'].textContent = displayName.toUpperCase();
     if (correct) el['pokemon-name'].classList.add('correct');
     refreshTypeBadges();
+    save();
   }
   // ── Hint ──────────────────────────────────────────────────
   function hint() {
-    if (!current || revealed) { showToast(T[lang].toastNoMore); return; }
+    if (!current) return;
+
+    if (revealed) {
+      playSound('ui');
+      showToast(T[lang].toastNoMore);
+      return;
+    }
+
     playSound('hint');
+
     const names = getNames();
     const name  = lang === 'fr' ? names.fr : names.en;
+
     const steps = [1, 3, 5];
     const len   = steps[Math.min(hintStep, steps.length - 1)];
-    hintStep    = Math.min(hintStep + 1, steps.length - 1);
+
+    hintStep = Math.min(hintStep + 1, steps.length - 1);
+
     const hintStr = name.slice(0, len).toUpperCase() + '...';
     const hintMsg = T[lang].hint(hintStr);
+
     el['status-text'].textContent = hintMsg;
     showToast(T[lang].toastHint(hintMsg), 3000);
   }
@@ -620,8 +660,11 @@ const Game = (() => {
         }
    
         // Écouteurs d'événements
-        el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
-        el['btn-new'].addEventListener('click', newPokemon);
+        el['btn-guess'].addEventListener('click', () => { playSound('ui'); check(); });
+        el['btn-new'].addEventListener('click', () => {
+          playSound('newmon');
+          newPokemon();
+        });
         el['btn-lang'].addEventListener('click', toggleLang);
         el.btnHint.addEventListener('click', hint);
         el.btnReveal.addEventListener('click', reveal);

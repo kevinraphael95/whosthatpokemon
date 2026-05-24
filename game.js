@@ -14,7 +14,7 @@ const Game = (() => {
   let revealed = false;
   let loading  = false;
   let muted    = false;
-
+  const MASTER_VOLUME = 0.12;
   let level = 1;
   let xp    = 0;   
    
@@ -99,7 +99,7 @@ const Game = (() => {
           osc.type = 'square';
           osc.frequency.setValueAtTime(880, now);
           osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
-          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.setValueAtTime(MASTER_VOLUME, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
           osc.start(now); osc.stop(now + 0.08);
         },
@@ -111,7 +111,7 @@ const Game = (() => {
             osc.type = 'square';
             osc.frequency.value = freq;
             gain.gain.setValueAtTime(0, now + delay);
-            gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+            gain.gain.linearRampToValueAtTime(MASTER_VOLUME, now + delay + 0.02);
             gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
             osc.start(now + delay); osc.stop(now + delay + 0.15);
           });
@@ -123,7 +123,7 @@ const Game = (() => {
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(220, now);
           osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
-          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.setValueAtTime(MASTER_VOLUME, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
           osc.start(now); osc.stop(now + 0.22);
         },
@@ -134,7 +134,7 @@ const Game = (() => {
             osc.connect(gain); gain.connect(ctx.destination);
             osc.type = 'triangle';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.14, now + delay);
+            gain.gain.setValueAtTime(MASTER_VOLUME, now + delay);
             gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.18);
             osc.start(now + delay); osc.stop(now + delay + 0.18);
           });
@@ -146,7 +146,7 @@ const Game = (() => {
           osc.type = 'sine';
           osc.frequency.setValueAtTime(660, now);
           osc.frequency.linearRampToValueAtTime(880, now + 0.12);
-          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.setValueAtTime(MASTER_VOLUME, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
           osc.start(now); osc.stop(now + 0.18);
         },
@@ -157,7 +157,7 @@ const Game = (() => {
           osc.type = 'sine';
           osc.frequency.setValueAtTime(600, now);
           osc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
-          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.setValueAtTime(MASTER_VOLUME, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           osc.start(now); osc.stop(now + 0.28);
         },
@@ -172,7 +172,7 @@ const Game = (() => {
             osc.connect(gain); gain.connect(ctx.destination);
             osc.type = 'square';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.18, now + delay);
+            gain.gain.setValueAtTime(MASTER_VOLUME, now + delay);
             gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur);
             osc.start(now + delay); osc.stop(now + delay + dur);
           });

@@ -764,11 +764,10 @@ body::before {
 .levelup-popup__title {
   font-family: var(--font-pixel);
   font-size: 13px;
-  color: #ffd600;
+  color: #0d2000; /* Un vert très foncé au lieu du jaune */
   letter-spacing: 3px;
-  text-shadow: 0 0 20px #ffd600, 0 0 40px rgba(255, 214, 0, 0.4);
+  text-shadow: none; /* On enlève la lueur jaune */
   text-align: center;
-  animation: titlePulse 1s ease infinite alternate;
   position: relative;
   z-index: 1;
 }
@@ -779,9 +778,9 @@ body::before {
 .levelup-popup__level {
   font-family: var(--font-pixel);
   font-size: 10px;
-  color: var(--screen-green);
+  color: #1a3000; /* Un vert foncé bien lisible */
   letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(155, 188, 15, 0.6);
+  text-shadow: none; /* On enlève l'ombre portée */
   text-align: center;
   position: relative;
   z-index: 1;

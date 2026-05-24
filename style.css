@@ -13,7 +13,7 @@
 
   /* Écran vert Game Boy */
   --screen-green: #9bbc0f;
-  --screen-dark:  #0f380f;
+  --screen-dark:  #1a2800;
   --screen-mid:   #306230;
   --screen-light: #8bac0f;
 
@@ -23,11 +23,6 @@
   --dot-green:    #69f0ae;
   --dot-red:      #ff1744;
   --dot-yellow:   #ffd600;
-
-  /* Mobile écran */
-  --screen-mobile-bg: #6a8f0a;
-  --screen-mobile-text: #1a2800;
-  --screen-mobile-text-dim: #2a3f00;
 
   /* Typographie */
   --font-pixel:   'Press Start 2P', monospace;
@@ -257,7 +252,7 @@ body::before {
 #pokemon-img {
   max-width: 85%; max-height: 85%;
   object-fit: contain;
-  filter: brightness(0);
+  filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   image-rendering: pixelated;
   transform-origin: center bottom;
   transition:
@@ -288,7 +283,7 @@ body::before {
   30%       { background: #b0e020; }
 }
 .screen--loading #pokemon-img {
-  filter: brightness(0);
+  filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   animation: scanLoad 1.2s linear infinite;
 }
 @keyframes scanLoad {
@@ -848,20 +843,20 @@ body::before {
   .lens { width: 44px; height: 44px; }
   .dot  { width: 10px; height: 10px; }
 
-  /* ── Écran principal — fond clair pour contraste max ── */
+  /* ── Écran principal — même fond que PC ── */
   .screen-label { display: none; }
+  .screen { min-height: 260px; }
 
-  .screen {
-    min-height: 260px;
-  }
-
-  /* ── Image Pokémon — silhouette noire sur fond clair ── */
+  /* ── Image Pokémon — même halo que PC ── */
   #pokemon-img {
     max-height: 230px;
-    filter: brightness(0) drop-shadow(0 0 8px white);
+    filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   }
   .screen--revealed #pokemon-img {
     filter: brightness(1.05) contrast(1.05) saturate(1.1);
+  }
+  .screen--loading #pokemon-img {
+    filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   }
 
   /* ── Types ── */
@@ -885,16 +880,8 @@ body::before {
   }
   .pokedex__right::before { content: none; }
 
-  /* ── Mini écran — fond clair + texte foncé ── */
-  .mini-screen {
-    min-height: 64px;
-    padding: 10px 14px;
-    background: var(--screen-mobile-bg);
-  }
-  .mini-screen__status { font-size: 8px;  color: var(--screen-mobile-text); }
-  .mini-screen__name   { font-size: 14px; color: var(--screen-mobile-text); text-shadow: none; }
-  .mini-screen__level  { font-size: 7px;  color: var(--screen-mobile-text-dim); }
-  .mini-screen__score  { font-size: 7px;  color: var(--screen-mobile-text-dim); }
+  /* ── Mini écran — même couleurs que PC ── */
+  .mini-screen { min-height: 64px; padding: 10px 14px; }
 
   /* ── Input ── */
   #guess-input {

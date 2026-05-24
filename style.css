@@ -836,7 +836,6 @@ body::before {
     background: linear-gradient(180deg, #b71c1c 0%, #7f0000 100%);
     flex: 1;
   }
-  .pokedex__right::before { content: none; }
 
   .mini-screen { min-height: 80px; padding: 10px 14px; }
 

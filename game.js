@@ -355,9 +355,13 @@ const Game = (() => {
       el['level-display'].classList.add('level-up-flash');
       setTimeout(() => el['level-display'].classList.remove('level-up-flash'), 1500);
     }
+/* level up fond sombre */
+/*     
     const screen = el['screen'];
     screen.classList.add('screen--levelup');
     setTimeout(() => screen.classList.remove('screen--levelup'), 1200);
+*/
+    
   }
   // ── Mute ──────────────────────────────────────────────────
   function toggleMute() {

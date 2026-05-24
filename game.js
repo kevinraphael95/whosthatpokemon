@@ -604,7 +604,7 @@ const Game = (() => {
       shake(el['guess-input']);
       el['status-text'].textContent = T[lang].statusWrong;
       showToast(T[lang].toastWrong, 1500);
-      el['guess-input'].select();
+      el['guess-input'].blur();
     }
     updateScore();
   }

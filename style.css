@@ -316,7 +316,7 @@ body::before {
 
 
 /* ── Badges de type ────────────────────────────────────────── */
-.type-bar { display: flex; gap: 8px; flex-wrap: wrap; min-height: 32px; }
+.type-bar { display: flex; gap: 8px; flex-wrap: wrap; min-height: 32px; height: 32px; }
 .type-badge {
   padding: 4px 12px;
   border-radius: 20px;
@@ -843,7 +843,7 @@ body::before {
 
   /* ── Types mobile ── */
   .type-badge { font-size: clamp(7px, 2.5vw, 11px); padding: 4px 10px; border-radius: 14px; }
-  .type-bar   { height: auto; min-height: unset; gap: 6px; flex-wrap: wrap; overflow: visible; }
+  .type-bar   { height: 30px; min-height: 30px; gap: 6px; flex-wrap: wrap; overflow: visible; }
 
   .speaker { display: none; }
   .hinge   { display: none; }

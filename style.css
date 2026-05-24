@@ -198,8 +198,9 @@ body::before {
   font-family: var(--font-pixel);
   font-size: 6px;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.75);
   padding-left: 4px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 .screen {
   flex: 1;
@@ -458,7 +459,7 @@ body::before {
 .mini-screen__status {
   font-family: var(--font-pixel);
   font-size: 8px;
-  color: #1a3000;
+  color: #0d2000;
   letter-spacing: 2px;
   position: relative;
   z-index: 1;
@@ -467,6 +468,7 @@ body::before {
 .mini-screen__name {
   font-family: var(--font-pixel);
   font-size: 15px;
+  font-weight: 700;
   color: #0d2000;
   text-shadow: none;
   position: relative;
@@ -514,14 +516,14 @@ body::before {
 .mini-screen__level {
   font-family: var(--font-pixel);
   font-size: 7px;
-  color: #2a4000;
+  color: #1a3000;
   letter-spacing: 1px;
   transition: color 0.3s;
 }
 .mini-screen__score {
   font-family: var(--font-pixel);
   font-size: 7px;
-  color: #2a4000;
+  color: #1a3000;
   letter-spacing: 1px;
 }
 
@@ -541,8 +543,9 @@ body::before {
   font-family: var(--font-pixel);
   font-size: 7px;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
   padding-left: 2px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 .input-wrap { position: relative; }
 

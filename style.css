@@ -292,7 +292,8 @@ body::before {
   50%  { clip-path: inset(0 0 0% 0);   opacity: 0.6; }
   100% { clip-path: inset(0 0 100% 0); opacity: 0.6; }
 }
-.screen--levelup { animation: levelupScreen 1.2s ease; }
+/* écran sombre au level up */
+/* .screen--levelup { animation: levelupScreen 1.2s ease; } 
 @keyframes levelupScreen {
   0%, 100% { background: var(--screen-dark); }
   20%       { background: #3a2e00; }
@@ -300,7 +301,7 @@ body::before {
   60%       { background: #3a2e00; }
   80%       { background: #1a1400; }
 }
-
+*/
 
 /* ── Overlay écran ─────────────────────────────────────────── */
 .screen__overlay {

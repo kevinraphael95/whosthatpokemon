@@ -794,7 +794,7 @@ body::before {
     border-radius: 0;
     border: none;
     padding: 12px 16px 4px;
-    gap: 6px;
+    gap: 20px;
     box-shadow: none;
     background: linear-gradient(180deg, #ef5350 0%, #b71c1c 100%);
   }

@@ -335,7 +335,7 @@ body::before {
   padding: 4px 12px;
   border-radius: 20px;
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 14px;
   letter-spacing: 1px;
   text-transform: uppercase;
   border: 2px solid rgba(255, 255, 255, 0.15);
@@ -468,7 +468,7 @@ body::before {
 }
 .mini-screen__name {
   font-family: var(--font-pixel);
-  font-size: 15px;
+  font-size: 30px;
   font-weight: 700;
   color: #0d2000;
   text-shadow: none;
@@ -863,7 +863,7 @@ body::before {
   }
 
   /* ── Types ── */
-  .type-badge { font-size: 7px; padding: 4px 10px; }
+  .type-badge { font-size: 14px; padding: 4px 10px; }
   .type-bar   { min-height: 32px; height: 32px; overflow: hidden; gap: 6px; }
 
   .speaker { display: none; }
@@ -883,7 +883,7 @@ body::before {
   .pokedex__right::before { content: none; }
 
   /* ── Mini écran — même couleurs que PC ── */
-  .mini-screen { min-height: 64px; padding: 10px 14px; }
+  .mini-screen { min-height: 80px; padding: 10px 14px; }
 
   /* ── Input ── */
   #guess-input {

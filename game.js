@@ -36,19 +36,22 @@ const Game = (() => {
     } catch (e) {}
   }
    
+
   function save() {
-      if (loading) return; // Empêche d'écraser la sauvegarde pendant le chargement
-      try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({
-          level, xp,
-          correct: score.correct,
-          wrong:   score.wrong,
-          muted,
-          lastPokemonId: current ? current.data.id : null,
-          wasRevealed: revealed
-        }));
-      } catch (e) {}
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        level,
+        xp,
+        correct: score.correct,
+        wrong: score.wrong,
+        muted,
+        lastPokemonId: current?.data?.id ?? lastPokemonId,
+        wasRevealed: revealed
+      }));
+    } catch (e) {
+      console.error("Erreur sauvegarde :", e);
     }
+  }
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let actx = null;
@@ -589,7 +592,7 @@ const Game = (() => {
         preloadLevelUpSounds();
    
         // ICI : Vérification stricte
-        if (lastPokemonId) {
+        if (lastPokemonId !== null) {
             try {
                 const payload = await loadById(lastPokemonId);
                 current = payload;

@@ -842,8 +842,8 @@ body::before {
   }
 
   /* ── Types mobile ── */
-  .type-badge { font-size: 7px; padding: 3px 8px; border-radius: 14px; }
-  .type-bar   { min-height: 28px; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
+  .type-badge { font-size: 6px; padding: 2px 6px; border-radius: 10px; line-height: 1.4; }
+  .type-bar   { min-height: 22px; height: auto; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
 
   .speaker { display: none; }
   .hinge   { display: none; }

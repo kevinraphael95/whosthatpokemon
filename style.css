@@ -315,42 +315,6 @@ body::before {
 }
 
 
-/* ── Badges de type ────────────────────────────────────────── */
-.type-bar { display: flex; gap: 8px; flex-wrap: wrap; min-height: 32px; height: 32px; }
-.type-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-family: var(--font-pixel);
-  font-size: 14px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  animation: badgeIn 0.4s cubic-bezier(.34, 1.56, .64, 1) both;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-@keyframes badgeIn {
-  from { opacity: 0; transform: scale(0.5) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.type-normal   { background: #9E9E9E; }
-.type-fire     { background: #E53935; }
-.type-water    { background: #1565C0; }
-.type-electric { background: #F9A825; }
-.type-grass    { background: #388E3C; }
-.type-ice      { background: #00ACC1; }
-.type-fighting { background: #BF360C; }
-.type-poison   { background: #6A1B9A; }
-.type-ground   { background: #8D6E63; }
-.type-flying   { background: #5C6BC0; }
-.type-psychic  { background: #AD1457; }
-.type-bug      { background: #827717; }
-.type-rock     { background: #757575; }
-.type-ghost    { background: #4527A0; }
-.type-dragon   { background: #283593; }
-.type-dark     { background: #212121; }
-.type-steel    { background: #546E7A; }
-.type-fairy    { background: #E91E63; }
 
 
 /* ── Haut-parleur ──────────────────────────────────────────── */
@@ -841,9 +805,6 @@ body::before {
     filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   }
 
-  /* ── Types mobile ── */
-  .type-badge { font-size: clamp(7px, 2.5vw, 11px); padding: 4px 10px; border-radius: 14px; }
-  .type-bar   { height: 30px; min-height: 30px; gap: 6px; flex-wrap: wrap; overflow: visible; }
 
   .speaker { display: none; }
   .hinge   { display: none; }

@@ -247,8 +247,9 @@ body::before {
 /* ── Logo ─────────────────────────────────────────────────── */
 .wtp-logo {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 140px;
   max-height: 60px;
   object-fit: contain;

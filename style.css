@@ -24,6 +24,11 @@
   --dot-red:      #ff1744;
   --dot-yellow:   #ffd600;
 
+  /* Mobile écran */
+  --screen-mobile-bg: #6a8f0a;
+  --screen-mobile-text: #1a2800;
+  --screen-mobile-text-dim: #2a3f00;
+
   /* Typographie */
   --font-pixel:   'Press Start 2P', monospace;
   --font-ui:      'Rajdhani', sans-serif;
@@ -429,7 +434,7 @@ body::before {
 
 /* ── Mini écran ────────────────────────────────────────────── */
 .mini-screen {
-  background: #6a8f0a;
+  background: var(--screen-dark);
   border: 4px solid #111;
   border-radius: var(--radius-md);
   padding: 10px 14px;
@@ -843,14 +848,14 @@ body::before {
   .lens { width: 44px; height: 44px; }
   .dot  { width: 10px; height: 10px; }
 
-  /* ── Écran principal ── */
+  /* ── Écran principal — fond clair pour contraste max ── */
   .screen-label { display: none; }
   .screen {
     min-height: 260px;
-    background: #6a8f0a;
+    background: var(--screen-mobile-bg);
   }
 
-  /* ── Image Pokémon ── */
+  /* ── Image Pokémon — silhouette noire sur fond clair ── */
   #pokemon-img {
     max-height: 230px;
     filter: brightness(0);
@@ -864,8 +869,8 @@ body::before {
   .type-bar   { min-height: 22px; gap: 6px; }
 
   /* ── Éléments cachés mobile ── */
-  .speaker  { display: none; }
-  .hinge    { display: none; }
+  .speaker { display: none; }
+  .hinge   { display: none; }
 
   /* ── Panneau droit (contrôles) ── */
   .pokedex__right {
@@ -880,12 +885,16 @@ body::before {
   }
   .pokedex__right::before { content: none; }
 
-  /* ── Mini écran ── */
-  .mini-screen { min-height: 64px; padding: 10px 14px; }
-  .mini-screen__status { font-size: 8px; color: var(--screen-light); }
-  .mini-screen__name   { font-size: 14px; }
-  .mini-screen__level  { font-size: 7px; color: rgba(155, 188, 15, 0.8); }
-  .mini-screen__score  { font-size: 7px; color: rgba(155, 188, 15, 0.7); }
+  /* ── Mini écran — fond clair + texte foncé ── */
+  .mini-screen {
+    min-height: 64px;
+    padding: 10px 14px;
+    background: var(--screen-mobile-bg);
+  }
+  .mini-screen__status { font-size: 8px;  color: var(--screen-mobile-text); }
+  .mini-screen__name   { font-size: 14px; color: var(--screen-mobile-text); text-shadow: none; }
+  .mini-screen__level  { font-size: 7px;  color: var(--screen-mobile-text-dim); }
+  .mini-screen__score  { font-size: 7px;  color: var(--screen-mobile-text-dim); }
 
   /* ── Input ── */
   #guess-input {

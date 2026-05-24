@@ -790,6 +790,7 @@ body::before {
     border-radius: 0;
     animation: none;
     gap: 0;
+    will-change: auto;
   }
 
   .pokedex__left {
@@ -822,7 +823,6 @@ body::before {
     filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
   }
 
-
   .speaker { display: none; }
   .hinge   { display: none; }
 
@@ -836,10 +836,10 @@ body::before {
     background: linear-gradient(180deg, #b71c1c 0%, #7f0000 100%);
     flex: 1;
   }
+  .pokedex__right::before { content: none; }
 
   .mini-screen { min-height: 80px; padding: 10px 14px; }
 
-  /* ── Nom mobile : taille fluide, pas de débordement ── */
   .mini-screen__name {
     font-size: clamp(12px, 5vw, 22px);
     white-space: nowrap;

@@ -1,9 +1,7 @@
 /* ============================================================
    WHO'S THAT POKÉMON — game.js
    ============================================================ */
-
 const Game = (() => {
-
   // ── State ─────────────────────────────────────────────────
   let current  = null;
   let next     = null;
@@ -13,11 +11,9 @@ const Game = (() => {
   let revealed = false;
   let loading  = false;
   let muted    = false;
-
   // ── Level system ──────────────────────────────────────────
   const LEVEL_THRESHOLD = 50;
   const SAVE_KEY = 'wtp_save';
-
   function loadSave() {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
@@ -30,7 +26,6 @@ const Game = (() => {
       muted        = s.muted   || false;
     } catch (e) {}
   }
-
   function save() {
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify({
@@ -41,26 +36,20 @@ const Game = (() => {
       }));
     } catch (e) {}
   }
-
   let level = 1;
   let xp    = 0;
-
   // ── Audio ─────────────────────────────────────────────────
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let actx = null;
-
   function getAudioCtx() {
     if (!actx) actx = new AudioCtx();
     return actx;
   }
-
-  // Précharge les musiques level up
   const LEVELUP_SOUNDS = {
     picross: 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-picross.mp3',
     bank:    'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-bank.mp3',
   };
   const audioBuffers = {};
-
   async function preloadLevelUpSounds() {
     const ctx = getAudioCtx();
     for (const [key, url] of Object.entries(LEVELUP_SOUNDS)) {
@@ -73,7 +62,6 @@ const Game = (() => {
       }
     }
   }
-
   function playBuffer(key) {
     if (muted) return;
     const ctx = getAudioCtx();
@@ -84,14 +72,11 @@ const Game = (() => {
     source.connect(ctx.destination);
     source.start(0);
   }
-
-  // Génère un son synthétique selon le type
   function playSound(type) {
     if (muted) return;
     try {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
-
       const configs = {
         click: () => {
           const osc = ctx.createOscillator();
@@ -105,7 +90,6 @@ const Game = (() => {
           osc.start(now); osc.stop(now + 0.08);
         },
         correct: () => {
-          // Jingle montant type Pokémon
           [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.32]].forEach(([freq, delay]) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -153,7 +137,6 @@ const Game = (() => {
           osc.start(now); osc.stop(now + 0.18);
         },
         newmon: () => {
-          // Swoosh descendant
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.connect(gain); gain.connect(ctx.destination);
@@ -165,7 +148,6 @@ const Game = (() => {
           osc.start(now); osc.stop(now + 0.28);
         },
         levelup: () => {
-          // Fanfare niveau up
           const sequence = [
             [523, 0, 0.12], [659, 0.13, 0.12], [784, 0.26, 0.12],
             [1047, 0.39, 0.22], [784, 0.63, 0.1], [1047, 0.75, 0.35],
@@ -182,19 +164,41 @@ const Game = (() => {
           });
         },
       };
-
       if (configs[type]) configs[type]();
     } catch (e) {
       console.warn('Audio error:', e);
     }
   }
-
   function playLevelUpMusic() {
     if (muted) return;
     const key = Math.random() < 0.99 ? 'picross' : 'bank';
     playBuffer(key);
   }
-
+  // ── Type translations ──────────────────────────────────────
+  const TYPE_FR = {
+    normal:   'NORMAL',
+    fire:     'FEU',
+    water:    'EAU',
+    electric: 'ÉLECTRIK',
+    grass:    'PLANTE',
+    ice:      'GLACE',
+    fighting: 'COMBAT',
+    poison:   'POISON',
+    ground:   'SOL',
+    flying:   'VOL',
+    psychic:  'PSY',
+    bug:      'INSECTE',
+    rock:     'ROCHE',
+    ghost:    'SPECTRE',
+    dragon:   'DRAGON',
+    dark:     'TÉNÈBRES',
+    steel:    'ACIER',
+    fairy:    'FÉE',
+  };
+  function getTypeName(apiName) {
+    if (lang === 'fr') return TYPE_FR[apiName] || apiName.toUpperCase();
+    return apiName.toUpperCase();
+  }
   // ── Translations ──────────────────────────────────────────
   const T = {
     fr: {
@@ -244,10 +248,8 @@ const Game = (() => {
       levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${LEVEL_THRESHOLD} XP`,
     },
   };
-
   // ── DOM cache ─────────────────────────────────────────────
   const el = {};
-
   function cacheDom() {
     [
       'pokemon-img','screen','screen-overlay','screen-prompt',
@@ -258,10 +260,8 @@ const Game = (() => {
     el.btnHint   = document.querySelector('.btn--hint');
     el.btnReveal = document.querySelector('.btn--reveal');
   }
-
   // ── Toast ─────────────────────────────────────────────────
   let toastEl = null, toastTimer = null;
-
   function showToast(msg, duration = 2200) {
     if (!toastEl) {
       toastEl = document.createElement('div');
@@ -273,7 +273,6 @@ const Game = (() => {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
   }
-
   // ── Language ──────────────────────────────────────────────
   function applyLang() {
     const t = T[lang];
@@ -290,8 +289,9 @@ const Game = (() => {
     }
     updateScore();
     updateLevelDisplay();
+    // Mettre à jour les badges de type si déjà révélé
+    if (revealed && current) refreshTypeBadges();
   }
-
   function toggleLang() {
     playSound('click');
     lang = lang === 'fr' ? 'en' : 'fr';
@@ -301,13 +301,11 @@ const Game = (() => {
       el['pokemon-name'].textContent = (lang === 'fr' ? names.fr : names.en).toUpperCase();
     }
   }
-
   // ── Score ─────────────────────────────────────────────────
   function updateScore() {
     el['score-display'].innerHTML = `✓ ${score.correct} &nbsp;✗ ${score.wrong}`;
     save();
   }
-
   // ── Level ─────────────────────────────────────────────────
   function updateLevelDisplay() {
     if (!el['level-display']) return;
@@ -317,7 +315,6 @@ const Game = (() => {
     }
     save();
   }
-
   function addXP() {
     xp++;
     if (xp >= LEVEL_THRESHOLD) {
@@ -327,10 +324,8 @@ const Game = (() => {
     }
     updateLevelDisplay();
   }
-
   // ── Level up popup ────────────────────────────────────────
   let popupEl = null;
-
   function showLevelUpPopup(lvl) {
     if (!popupEl) {
       popupEl = document.createElement('div');
@@ -353,23 +348,17 @@ const Game = (() => {
     popupEl.classList.add('show');
     setTimeout(() => popupEl && popupEl.classList.remove('show'), 6000);
   }
-
   function triggerLevelUp() {
     playLevelUpMusic();
     showLevelUpPopup(level);
-
-    // Flash level badge
     if (el['level-display']) {
       el['level-display'].classList.add('level-up-flash');
       setTimeout(() => el['level-display'].classList.remove('level-up-flash'), 1500);
     }
-
-    // Screen flash gold
     const screen = el['screen'];
     screen.classList.add('screen--levelup');
     setTimeout(() => screen.classList.remove('screen--levelup'), 1200);
   }
-
   // ── Mute ──────────────────────────────────────────────────
   function toggleMute() {
     muted = !muted;
@@ -379,10 +368,8 @@ const Game = (() => {
     }
     save();
   }
-
   // ── Fetch + cache ─────────────────────────────────────────
   const apiCache = new Map();
-
   async function fetchJSON(url) {
     if (apiCache.has(url)) return apiCache.get(url);
     const res = await fetch(url);
@@ -391,7 +378,6 @@ const Game = (() => {
     apiCache.set(url, data);
     return data;
   }
-
   function preloadImage(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -400,7 +386,6 @@ const Game = (() => {
       img.src = url;
     });
   }
-
   // ── Load pokemon by id ────────────────────────────────────
   async function loadById(id) {
     const data = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
@@ -411,18 +396,15 @@ const Game = (() => {
     await preloadImage(imgUrl);
     return { data, species, imgUrl };
   }
-
   // ── Prefetch ──────────────────────────────────────────────
   function prefetchNext() {
     const id = randomId();
     next = loadById(id).catch(() => { next = null; });
   }
-
   // ── Transition helpers ────────────────────────────────────
   function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
   }
-
   async function exitScreen() {
     const screen = el['screen'];
     const img    = el['pokemon-img'];
@@ -431,7 +413,6 @@ const Game = (() => {
     screen.classList.add('screen--exit');
     await sleep(300);
   }
-
   function resetImgStyle() {
     const img = el['pokemon-img'];
     img.style.transition = '';
@@ -439,7 +420,16 @@ const Game = (() => {
     img.style.opacity    = '';
     img.style.transform  = '';
   }
-
+  // ── Type badges ───────────────────────────────────────────
+  function refreshTypeBadges() {
+    if (!current) return;
+    el['type-bar'].innerHTML = current.data.types
+      .map((t, i) =>
+        `<span class="type-badge type-${t.type.name}" style="animation-delay:${i * 0.15}s">
+           ${getTypeName(t.type.name)}
+         </span>`
+      ).join('');
+  }
   // ── New Pokémon ───────────────────────────────────────────
   async function newPokemon() {
     if (loading) return;
@@ -447,12 +437,9 @@ const Game = (() => {
     hintStep = 0;
     revealed = false;
     current  = null;
-
     playSound('newmon');
-
     const screen = el['screen'];
     await exitScreen();
-
     screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit', 'screen--levelup');
     el['type-bar'].innerHTML           = '';
     el['pokemon-name'].textContent     = '';
@@ -460,19 +447,15 @@ const Game = (() => {
     el['status-text'].textContent      = T[lang].statusLoad;
     el['guess-input'].value            = '';
     el['guess-input'].classList.remove('shake');
-
     try {
       const pendingNext = next;
       next = null;
       const payload = pendingNext ? await pendingNext : await loadById(randomId());
       current = payload;
-
       resetImgStyle();
       el['pokemon-img'].src         = payload.imgUrl;
       el['status-text'].textContent = T[lang].statusReady;
-
       prefetchNext();
-
     } catch (err) {
       console.error(err);
       resetImgStyle();
@@ -480,14 +463,11 @@ const Game = (() => {
       showToast('API ERROR – RETRY', 3000);
       current = null;
     }
-
     loading = false;
   }
-
   function randomId() {
     return Math.floor(Math.random() * 1025) + 1;
   }
-
   // ── Normalise ─────────────────────────────────────────────
   function normalize(s) {
     return s
@@ -496,7 +476,6 @@ const Game = (() => {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
   }
-
   // ── Noms EN + FR ──────────────────────────────────────────
   function getNames() {
     if (!current) return { en: '', fr: '' };
@@ -507,19 +486,15 @@ const Game = (() => {
       fr: frEntry ? frEntry.name : current.data.name,
     };
   }
-
   // ── Check ─────────────────────────────────────────────────
   function check() {
     if (!current || revealed) return;
-
     const guess = el['guess-input'].value.trim();
     if (!guess) return;
-
     const names = getNames();
     const isCorrect =
       normalize(guess) === normalize(names.en) ||
       normalize(guess) === normalize(names.fr);
-
     if (isCorrect) {
       score.correct++;
       addXP();
@@ -538,14 +513,12 @@ const Game = (() => {
     }
     updateScore();
   }
-
   function shake(node) {
     node.classList.remove('shake');
     void node.offsetWidth;
     node.classList.add('shake');
     node.addEventListener('animationend', () => node.classList.remove('shake'), { once: true });
   }
-
   // ── Reveal ────────────────────────────────────────────────
   function reveal() {
     if (!current || revealed) return;
@@ -554,61 +527,46 @@ const Game = (() => {
     el['status-text'].textContent = T[lang].statusReveal;
     showToast(T[lang].toastReveal, 2000);
   }
-
   function revealPokemon(correct) {
     revealed = true;
     resetImgStyle();
     const screen = el['screen'];
     screen.classList.add('screen--revealed');
     if (correct) screen.classList.add('screen--flash');
-
     const names       = getNames();
     const displayName = lang === 'fr' ? names.fr : names.en;
     el['pokemon-name'].textContent = displayName.toUpperCase();
     if (correct) el['pokemon-name'].classList.add('correct');
-
-    el['type-bar'].innerHTML = current.data.types
-      .map((t, i) =>
-        `<span class="type-badge type-${t.type.name}" style="animation-delay:${i * 0.15}s">
-           ${t.type.name.toUpperCase()}
-         </span>`
-      ).join('');
+    refreshTypeBadges();
   }
-
   // ── Hint ──────────────────────────────────────────────────
   function hint() {
     if (!current || revealed) { showToast(T[lang].toastNoMore); return; }
-
     playSound('hint');
     const names = getNames();
     const name  = lang === 'fr' ? names.fr : names.en;
     const steps = [1, 3, 5];
     const len   = steps[Math.min(hintStep, steps.length - 1)];
     hintStep    = Math.min(hintStep + 1, steps.length - 1);
-
     const hintStr = name.slice(0, len).toUpperCase() + '...';
     const hintMsg = T[lang].hint(hintStr);
     el['status-text'].textContent = hintMsg;
     showToast(T[lang].toastHint(hintMsg), 3000);
   }
-
   // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
-
   // ── Init ──────────────────────────────────────────────────
   function init() {
     cacheDom();
     loadSave();
     applyLang();
     updateLevelDisplay();
-    // Appliquer état mute sauvegardé
     if (muted && el['btn-mute']) {
       el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
       el['btn-mute'].classList.add('btn--muted');
     }
     preloadLevelUpSounds();
     newPokemon();
-
     el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
     el['btn-new'].addEventListener('click', newPokemon);
     el['btn-lang'].addEventListener('click', toggleLang);
@@ -616,9 +574,6 @@ const Game = (() => {
     el.btnReveal.addEventListener('click', reveal);
     if (el['btn-mute']) el['btn-mute'].addEventListener('click', toggleMute);
   }
-
   document.addEventListener('DOMContentLoaded', init);
-
   return { newPokemon, toggleLang, check, reveal, hint };
-
 })();

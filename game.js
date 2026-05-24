@@ -37,6 +37,7 @@ const Game = (() => {
   }
    
   function save() {
+      if (loading) return; // Empêche d'écraser la sauvegarde pendant le chargement
       try {
         localStorage.setItem(SAVE_KEY, JSON.stringify({
           level, xp,
@@ -44,7 +45,7 @@ const Game = (() => {
           wrong:   score.wrong,
           muted,
           lastPokemonId: current ? current.data.id : null,
-          wasRevealed: revealed // Ceci enregistre si le Pokémon actuel est révélé ou non
+          wasRevealed: revealed
         }));
       } catch (e) {}
     }
@@ -450,8 +451,6 @@ const Game = (() => {
       loading = true;
       hintStep = 0;
     
-      // On ne réinitialise plus les variables ici pour éviter de perdre le Pokémon actuel trop tôt
-    
       const screen = el['screen'];
       await exitScreen();
     
@@ -469,21 +468,21 @@ const Game = (() => {
         const payload = pendingNext ? await pendingNext : await loadById(randomId());
       
         current = payload;
-        lastPokemonId = payload.data.id; // Mise à jour de l'ID ici
-        revealed = false;                // On réinitialise l'état pour le nouveau
-        save();                          // Sauvegarde APRÈS avoir chargé les nouvelles données
+        lastPokemonId = payload.data.id;
+        revealed = false;
       
         resetImgStyle();
         el['pokemon-img'].src = payload.imgUrl;
         el['status-text'].textContent = T[lang].statusReady;
+        loading = false; // Important : débloquer AVANT de sauvegarder
+        save();
         prefetchNext();
       } catch (err) {
+        loading = false;
         console.error(err);
-        resetImgStyle();
         el['status-text'].textContent = 'ERREUR';
         showToast('API ERROR – RETRY', 3000);
       }
-      loading = false;
     }
   function randomId() {
     return Math.floor(Math.random() * 1025) + 1;
@@ -576,41 +575,39 @@ const Game = (() => {
   // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
   // ── Init ──────────────────────────────────────────────────
-    async function init() { // J'ai ajouté async ici
-      cacheDom();
-      loadSave();
-      applyLang();
-      updateLevelDisplay();
-      if (muted && el['btn-mute']) {
-        el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
-        el['btn-mute'].classList.add('btn--muted');
-      }
-      preloadLevelUpSounds();
-
-      // ICI : Si on a un ID, on le charge, sinon on en tire un nouveau
-            if (lastPokemonId) {
-              try {
-                const payload = await loadById(lastPokemonId);
-                current = payload;
-                el['pokemon-img'].src = payload.imgUrl;
-                
-                // On force la variable revealed à l'état sauvegardé
-                revealed = wasRevealed;
-                
-                if (revealed) {
-                  revealPokemon(false);
-                } else {
-                  resetImgStyle();
-                  el['pokemon-img'].style.filter = 'brightness(0)';
-                  el['status-text'].textContent = T[lang].statusReady;
-                }
-                prefetchNext();
-              } catch (e) {
-                newPokemon();
-              }
+    async function init() {
+        cacheDom();
+        loadSave();
+        applyLang();
+        updateLevelDisplay();
+        if (muted && el['btn-mute']) {
+          el['btn-mute'].querySelector('.btn__top').textContent = '🔇';
+          el['btn-mute'].classList.add('btn--muted');
+        }
+        preloadLevelUpSounds();
+   
+        if (lastPokemonId) {
+          try {
+            const payload = await loadById(lastPokemonId);
+            current = payload;
+            el['pokemon-img'].src = payload.imgUrl;
+            revealed = wasRevealed;
+            if (revealed) {
+              revealPokemon(false);
             } else {
-              newPokemon();
+              resetImgStyle();
+              el['pokemon-img'].style.filter = 'brightness(0)';
+              el['status-text'].textContent = T[lang].statusReady;
             }
+            prefetchNext();
+          } catch (e) {
+            console.error("Erreur chargement session, on génère un nouveau.");
+            newPokemon();
+          }
+        } else {
+          newPokemon();
+        }
+
 
       el['btn-guess'].addEventListener('click', () => { playSound('click'); check(); });
       el['btn-new'].addEventListener('click', newPokemon);

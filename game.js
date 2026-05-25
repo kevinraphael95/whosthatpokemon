@@ -591,13 +591,14 @@ const Game = (() => {
       Toast.show(T[lang].toastCorrect);
       setTimeout(newPokemon, CONFIG.AUTO_NEXT_DELAY);
     } else {
-      score.wrong++;
-      Audio.play('wrong');
-      shake(input);
-      Dom.setText('status-text', T[lang].statusWrong);
-      Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
-      input.blur();
-    }
+          score.wrong++;
+          Audio.play('wrong');
+          shake(input);
+          Dom.setText('status-text', T[lang].statusWrong);
+          Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
+          if ('ontouchstart' in window) input.blur();
+          else input.focus();
+        }
     updateScore();
   }
 

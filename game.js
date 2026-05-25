@@ -6,7 +6,7 @@
 const CONFIG = {
   MAX_POKEMON_ID   : 1025,
   LEVEL_THRESHOLD  : 50,
-  MASTER_VOLUME    : 0.35,
+  MASTER_VOLUME    : 0.65,
   SAVE_KEY         : 'wtp_save',
   TOAST_DURATION   : 2200,
   TOAST_SHORT      : 1500,

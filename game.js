@@ -596,7 +596,7 @@ const Game = (() => {
       shake(input);
       Dom.setText('status-text', T[lang].statusWrong);
       Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
-      input.select();
+      input.blur();
     }
     updateScore();
   }

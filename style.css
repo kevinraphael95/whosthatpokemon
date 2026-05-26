@@ -125,7 +125,7 @@ body::before {
 
 /* ── Panneau gauche ────────────────────────────────────────── */
 .pokedex__left {
-  width          : 420px;
+  width          : 560px;
   background     : linear-gradient(160deg, #ef5350 0%, #b71c1c 50%, #7f0000 100%);
   border-radius  : var(--radius-xl) 0 0 var(--radius-xl);
   padding        : 28px 24px 28px 28px;
@@ -235,7 +235,7 @@ body::before {
     0 4px 16px rgba(0, 0, 0, 0.8);
   position       : relative;
   overflow       : hidden;
-  min-height     : 300px;
+  min-height     : 420px;
   display        : flex;
   align-items    : center;
   justify-content: center;
@@ -400,7 +400,7 @@ body::before {
 
 /* ── Panneau droit ─────────────────────────────────────────── */
 .pokedex__right {
-  width          : 420px;
+  width          : 560px;
   background     : linear-gradient(160deg, #c62828 0%, #8d0000 50%, #5a0000 100%);
   border-radius  : 0 var(--radius-xl) var(--radius-xl) 0;
   padding        : 28px 28px 28px 24px;

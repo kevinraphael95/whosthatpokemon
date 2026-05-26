@@ -560,6 +560,7 @@ const Game = (() => {
       loading = false;
       persist();
       prefetchNext();
+      if (!('ontouchstart' in window)) Dom.get('guess-input').focus();
     } catch (err) {
       loading = false;
       console.error('newPokemon error:', err);

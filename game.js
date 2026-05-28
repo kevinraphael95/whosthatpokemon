@@ -1,129 +1,172 @@
-/* ============================================================
-   WHO'S THAT POKÉMON — game.js  (refacto pro)
-   ============================================================ */
+/**
+ * WHO'S THAT POKÉMON — game.js v2 pro
+ * @module Game
+ */
 
-/* ── CONFIG — toutes les constantes au même endroit ────────── */
-const CONFIG = {
-  MAX_POKEMON_ID   : 1025,
-  LEVEL_THRESHOLD  : 50,
-  MASTER_VOLUME    : 0.95,
-  SAVE_KEY         : 'wtp_save',
-  TOAST_DURATION   : 2200,
-  TOAST_SHORT      : 1500,
-  TOAST_LONG       : 3000,
-  REVEAL_DELAY     : 2000,
-  AUTO_NEXT_DELAY  : 1500,
-  LEVELUP_HIDE     : 6000,
-  HINT_STEPS       : [1, 3, 5],
-  LEVELUP_SOUNDS   : {
+'use strict';
+
+/* ================================================================
+   CONFIG
+   ================================================================ */
+/** @type {Readonly<GameConfig>} */
+const CONFIG = Object.freeze({
+  MAX_POKEMON_ID  : 1025,
+  LEVEL_THRESHOLD : 50,
+  SAVE_KEY        : 'wtp_v2',
+  SAVE_VERSION    : 2,
+  HISTORY_MAX     : 8,
+  HINT_STEPS      : [1, 3, 5],
+  TOAST_DEFAULT   : 2200,
+  TOAST_SHORT     : 1400,
+  TOAST_LONG      : 3200,
+  REVEAL_DELAY    : 1800,
+  AUTO_NEXT_DELAY : 1400,
+  LEVELUP_AUTO_CLOSE: 6000,
+  XP_CIRC         : 150.796, /* 2π × 24 */
+  LEVELUP_SOUNDS  : {
     picross : 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-picross.mp3',
     bank    : 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/pokemonlevelup/pok-mon-bank.mp3',
   },
-};
+});
 
-/* ── TRANSLATIONS ────────────────────────────────────────────── */
+/* ================================================================
+   TRANSLATIONS
+   ================================================================ */
+/** @type {Record<string, Translations>} */
 const T = {
   fr: {
     inputLabel   : 'ENTREZ LE NOM',
-    inputPH      : 'Tape le nom...',
+    inputPH      : 'Tapez un nom...',
     statusReady  : 'PRÊT',
     statusLoad   : 'CHARGEMENT...',
-    statusCorrect: 'BONNE RÉP. !',
-    statusWrong  : 'MAUVAISE RÉP.',
+    statusCorrect: 'CORRECT !',
+    statusWrong  : 'RÉESSAIE !',
     statusReveal : 'RÉVÉLÉ',
-    btnGuess     : 'DEVINER',
-    btnNew       : '— NOUVEAU POKÉMON —',
-    btnHint      : 'INDICE',
-    btnReveal    : 'RÉVÉLER',
-    btnLang      : 'FR / EN',
-    screenLabel  : 'DISPLAY / AFFICHAGE',
-    hint         : (l) => `COMMENCE PAR : ${l}`,
+    lblCorrect   : 'CORRECT',
+    lblWrong     : 'RATÉ',
+    lblLevel     : 'NIVEAU',
+    lblNew       : 'NOUVEAU POKÉMON',
+    lblHint      : 'INDICE',
+    lblReveal    : 'RÉVÉLER',
+    popupEyebrow : 'LEVEL UP',
+    popupLevel   : (lvl) => `NIVEAU ${lvl}`,
+    hint         : (l)   => `COMMENCE PAR : ${l}`,
     toastCorrect : '✓ BONNE RÉPONSE !',
     toastWrong   : '✗ RÉESSAIE !',
     toastReveal  : '👁 RÉVÉLÉ',
-    toastHint    : (h) => `💡 ${h}`,
+    toastHint    : (h)   => `💡 ${h}`,
     toastNoMore  : 'CHARGE UN NOUVEAU POKÉMON',
     toastLevelUp : (lvl) => `🏆 NIVEAU ${lvl} !`,
-    levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${CONFIG.LEVEL_THRESHOLD} XP`,
-    popupTitle   : 'NIVEAU SUPÉRIEUR',
-    popupSub     : (lvl) => `NIVEAU ${lvl} ATTEINT`,
-    errRetry     : 'API ERROR – RETRY',
-    errLabel     : 'ERREUR',
+    xpLabel      : (xp)  => `${xp} / ${CONFIG.LEVEL_THRESHOLD} XP`,
+    errRetry     : 'ERREUR API — RÉESSAIE',
   },
   en: {
     inputLabel   : 'ENTER NAME',
     inputPH      : 'Type a name...',
     statusReady  : 'READY',
     statusLoad   : 'LOADING...',
-    statusCorrect: 'CORRECT !',
-    statusWrong  : 'WRONG !',
+    statusCorrect: 'CORRECT!',
+    statusWrong  : 'TRY AGAIN!',
     statusReveal : 'REVEALED',
-    btnGuess     : 'GUESS',
-    btnNew       : '— NEW POKÉMON —',
-    btnHint      : 'HINT',
-    btnReveal    : 'REVEAL',
-    btnLang      : 'EN / FR',
-    screenLabel  : 'DISPLAY / AFFICHAGE',
-    hint         : (l) => `STARTS WITH: ${l}`,
-    toastCorrect : '✓ CORRECT !',
-    toastWrong   : '✗ TRY AGAIN !',
+    lblCorrect   : 'CORRECT',
+    lblWrong     : 'WRONG',
+    lblLevel     : 'LEVEL',
+    lblNew       : 'NEW POKÉMON',
+    lblHint      : 'HINT',
+    lblReveal    : 'REVEAL',
+    popupEyebrow : 'LEVEL UP',
+    popupLevel   : (lvl) => `LEVEL ${lvl}`,
+    hint         : (l)   => `STARTS WITH: ${l}`,
+    toastCorrect : '✓ CORRECT!',
+    toastWrong   : '✗ TRY AGAIN!',
     toastReveal  : '👁 REVEALED',
-    toastHint    : (h) => `💡 ${h}`,
+    toastHint    : (h)   => `💡 ${h}`,
     toastNoMore  : 'LOAD A NEW POKEMON',
-    toastLevelUp : (lvl) => `🏆 LEVEL ${lvl} !`,
-    levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${CONFIG.LEVEL_THRESHOLD} XP`,
-    popupTitle   : 'LEVEL UP',
-    popupSub     : (lvl) => `LEVEL ${lvl} REACHED`,
-    errRetry     : 'API ERROR – RETRY',
-    errLabel     : 'ERROR',
+    toastLevelUp : (lvl) => `🏆 LEVEL ${lvl}!`,
+    xpLabel      : (xp)  => `${xp} / ${CONFIG.LEVEL_THRESHOLD} XP`,
+    errRetry     : 'API ERROR — RETRY',
   },
 };
 
-/* ── STORAGE — lecture / écriture isolées ───────────────────── */
-const Storage = {
-  load() {
+/* ================================================================
+   STORAGE
+   Versioned save avec migration automatique
+   ================================================================ */
+const Storage = (() => {
+  /** @returns {SaveState|null} */
+  function load() {
     try {
       const raw = localStorage.getItem(CONFIG.SAVE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (data?.version !== CONFIG.SAVE_VERSION) return null; // migration : reset
+      return data;
     } catch {
       return null;
     }
-  },
-  save(state) {
+  }
+
+  /** @param {SaveState} state */
+  function save(state) {
     try {
-      localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(state));
+      localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify({
+        version: CONFIG.SAVE_VERSION,
+        ...state,
+      }));
     } catch (e) {
-      console.error('Save error:', e);
+      console.warn('[Storage] write failed:', e);
     }
-  },
-};
+  }
 
-/* ── API — fetch + cache + préchargement image ──────────────── */
+  return { load, save };
+})();
+
+/* ================================================================
+   API
+   Cache LRU simple + préchargement image
+   ================================================================ */
 const Api = (() => {
+  /** @type {Map<string, any>} */
   const cache = new Map();
+  const MAX_CACHE = 50;
 
+  /**
+   * @param {string} url
+   * @returns {Promise<any>}
+   */
   async function fetchJSON(url) {
     if (cache.has(url)) return cache.get(url);
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status} — ${url}`);
     const data = await res.json();
+    if (cache.size >= MAX_CACHE) cache.delete(cache.keys().next().value);
     cache.set(url, data);
     return data;
   }
 
+  /**
+   * @param {string} url
+   * @returns {Promise<string>}
+   */
   function preloadImage(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload  = () => resolve(url);
-      img.onerror = () => reject(new Error(`Image failed: ${url}`));
+      img.onerror = () => reject(new Error(`Image load failed: ${url}`));
       img.src = url;
     });
   }
 
+  /**
+   * @param {number} id
+   * @returns {Promise<PokemonPayload>}
+   */
   async function loadPokemon(id) {
-    const data    = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    const species = await fetchJSON(data.species.url);
-    const imgUrl  =
+    const [data, species] = await Promise.all([
+      fetchJSON(`https://pokeapi.co/api/v2/pokemon/${id}`),
+      fetchJSON(`https://pokeapi.co/api/v2/pokemon-species/${id}`),
+    ]);
+    const imgUrl =
       data.sprites.other?.['official-artwork']?.front_default ||
       data.sprites.front_default;
     await preloadImage(imgUrl);
@@ -133,31 +176,41 @@ const Api = (() => {
   return { loadPokemon };
 })();
 
-/* ── AUDIO ──────────────────────────────────────────────────── */
-const Audio = (() => {
-  let actx = null;
+/* ================================================================
+   SFX
+   Web Audio API — synthèse + buffers preloadés
+   ================================================================ */
+const Sfx = (() => {
+  /** @type {AudioContext|null} */
+  let ctx = null;
+  /** @type {Record<string, AudioBuffer>} */
   const buffers = {};
+  let muted = false;
 
-  function ctx() {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    return actx;
+  function getCtx() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
   }
 
   async function preload() {
-    const c = ctx();
+    const c = getCtx();
     for (const [key, url] of Object.entries(CONFIG.LEVELUP_SOUNDS)) {
       try {
         const res = await fetch(url);
         const ab  = await res.arrayBuffer();
         buffers[key] = await c.decodeAudioData(ab);
       } catch (e) {
-        console.warn(`Audio preload failed [${key}]:`, e);
+        console.warn(`[Sfx] preload failed [${key}]:`, e);
       }
     }
   }
 
-  function playBuffer(key, volume = 0.6) {
-    const c   = ctx();
+  /**
+   * @param {string} key
+   * @param {number} [volume]
+   */
+  function playBuffer(key, volume = 0.7) {
+    const c   = getCtx();
     const buf = buffers[key];
     if (!buf) return;
     const src  = c.createBufferSource();
@@ -169,107 +222,85 @@ const Audio = (() => {
     src.start(0);
   }
 
-  /* Toutes les définitions de sons en un seul endroit */
-  const SOUNDS = {
+  /* ── Définitions sons synthétisés ── */
+  const DEFS = {
     ui() {
-      const c = ctx(), now = c.currentTime;
-      const osc = c.createOscillator(), gain = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(520, now);
-      osc.frequency.linearRampToValueAtTime(620, now + 0.08);
-      gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.5, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.12);
-    },
-    click() {
-      const c = ctx(), now = c.currentTime;
-      const osc = c.createOscillator(), gain = c.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.exponentialRampToValueAtTime(500, now + 0.06);
-      gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.08);
+      const c = getCtx(), t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(480, t);
+      o.frequency.linearRampToValueAtTime(560, t + 0.08);
+      g.gain.setValueAtTime(0.4, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.12);
     },
     correct() {
-      const c = ctx(), now = c.currentTime;
+      const c = getCtx(), t = c.currentTime;
       [523, 659, 784].forEach((freq, i) => {
-        const osc = c.createOscillator(), gain = c.createGain();
-        const t = now + i * 0.12;
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(CONFIG.MASTER_VOLUME * 0.6, t + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-        osc.connect(gain); gain.connect(c.destination);
-        osc.start(t); osc.stop(t + 0.2);
+        const o = c.createOscillator(), g = c.createGain();
+        const st = t + i * 0.11;
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0, st);
+        g.gain.linearRampToValueAtTime(0.55, st + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, st + 0.22);
+        o.connect(g); g.connect(c.destination);
+        o.start(st); o.stop(st + 0.22);
       });
     },
     wrong() {
-      const c = ctx(), now = c.currentTime;
-      const osc = c.createOscillator(), gain = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
-      gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.3);
+      const c = getCtx(), t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(280, t);
+      o.frequency.exponentialRampToValueAtTime(160, t + 0.28);
+      g.gain.setValueAtTime(0.35, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.32);
     },
     reveal() {
-      const c = ctx(), now = c.currentTime;
-      [[392, 0], [494, 0.12], [587, 0.24]].forEach(([freq, delay]) => {
-        const osc = c.createOscillator(), gain = c.createGain();
-        const t = now + delay;
-        osc.type = 'triangle'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.5, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-        osc.connect(gain); gain.connect(c.destination);
-        osc.start(t); osc.stop(t + 0.25);
+      const c = getCtx(), t = c.currentTime;
+      [[392, 0], [494, 0.11], [587, 0.22]].forEach(([freq, delay]) => {
+        const o = c.createOscillator(), g = c.createGain();
+        const st = t + delay;
+        o.type = 'triangle'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.45, st);
+        g.gain.exponentialRampToValueAtTime(0.001, st + 0.28);
+        o.connect(g); g.connect(c.destination);
+        o.start(st); o.stop(st + 0.28);
       });
     },
     hint() {
-      const c = ctx(), now = c.currentTime;
-      const osc = c.createOscillator(), gain = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.linearRampToValueAtTime(740, now + 0.15);
-      gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.2);
+      const c = getCtx(), t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(580, t);
+      o.frequency.linearRampToValueAtTime(720, t + 0.14);
+      g.gain.setValueAtTime(0.3, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.18);
     },
     newmon() {
-      const c = ctx(), now = c.currentTime;
-      const osc = c.createOscillator(), gain = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(500, now);
-      osc.frequency.exponentialRampToValueAtTime(220, now + 0.35);
-      gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.5, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.4);
-    },
-    levelup() {
-      const c = ctx(), now = c.currentTime;
-      [[523, 0], [659, 0.15], [784, 0.3], [988, 0.5], [784, 0.75]].forEach(([freq, delay]) => {
-        const osc = c.createOscillator(), gain = c.createGain();
-        const t = now + delay;
-        osc.type = 'triangle'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(CONFIG.MASTER_VOLUME * 0.6, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-        osc.connect(gain); gain.connect(c.destination);
-        osc.start(t); osc.stop(t + 0.5);
-      });
+      const c = getCtx(), t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(460, t);
+      o.frequency.exponentialRampToValueAtTime(200, t + 0.38);
+      g.gain.setValueAtTime(0.45, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.42);
     },
   };
 
-  let muted = false;
-
+  /**
+   * @param {string} type
+   */
   function play(type) {
     if (muted) return;
-    try { SOUNDS[type]?.(); } catch (e) { console.warn('Audio error:', e); }
+    try { DEFS[type]?.(); } catch (e) { console.warn('[Sfx] error:', e); }
   }
 
   function playLevelUp() {
@@ -278,98 +309,171 @@ const Audio = (() => {
     playBuffer(key);
   }
 
+  /** @param {boolean} val */
   function setMuted(val) { muted = val; }
   function isMuted()     { return muted; }
 
   return { preload, play, playLevelUp, setMuted, isMuted };
 })();
 
-/* ── DOM — accès centralisé ─────────────────────────────────── */
+/* ================================================================
+   DOM
+   Accès centralisé + helpers typés
+   ================================================================ */
 const Dom = (() => {
-  const ids = [
-    'pokemon-img', 'screen', 'screen-overlay', 'screen-prompt',
-    'status-text', 'pokemon-name', 'score-display',
-    'guess-input', 'input-label', 'btn-guess', 'btn-new', 'btn-lang',
-    'screen-label', 'level-display', 'btn-mute', 'xp-bar-fill',
-  ];
-  const el = {};
+  /** @type {Record<string, HTMLElement>} */
+  const cache = {};
 
-  function init() {
-    ids.forEach(id => { el[id] = document.getElementById(id); });
-    el.btnHint   = document.querySelector('.btn--hint');
-    el.btnReveal = document.querySelector('.btn--reveal');
+  /**
+   * @template {HTMLElement} T
+   * @param {string} id
+   * @returns {T}
+   */
+  function get(id) {
+    if (!cache[id]) {
+      const el = document.getElementById(id);
+      if (!el) console.warn(`[Dom] #${id} not found`);
+      else cache[id] = el;
+    }
+    return /** @type {T} */ (cache[id]);
   }
 
-  function get(id) { return el[id]; }
-
-  function setText(id, text) {
-    const node = el[id];
-    if (node) node.textContent = text;
+  /** @param {string} id @param {string} text */
+  function text(id, val) {
+    const el = get(id);
+    if (el) el.textContent = val;
   }
 
-  function setHtml(id, html) {
-    const node = el[id];
-    if (node) node.innerHTML = html;
+  /** @param {string} id @param {string} html */
+  function html(id, val) {
+    const el = get(id);
+    if (el) el.innerHTML = val;
   }
 
-  return { init, get, setText, setHtml };
+  /**
+   * @param {HTMLElement} el
+   * @param {string} cls
+   */
+  function pulse(el, cls, duration = 400) {
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), duration);
+  }
+
+  /**
+   * Shake animation sur un élément
+   * @param {HTMLElement} el
+   */
+  function shake(el) {
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
+  }
+
+  return { get, text, html, pulse, shake };
 })();
 
-/* ── TOAST ──────────────────────────────────────────────────── */
+/* ================================================================
+   TOAST
+   ================================================================ */
 const Toast = (() => {
+  /** @type {HTMLElement|null} */
   let el    = null;
   let timer = null;
 
-  function show(msg, duration = CONFIG.TOAST_DURATION) {
-    if (!el) {
-      el = document.createElement('div');
-      el.className = 'toast';
-      document.body.appendChild(el);
-    }
+  /**
+   * @param {string} msg
+   * @param {number} [duration]
+   */
+  function show(msg, duration = CONFIG.TOAST_DEFAULT) {
+    if (!el) el = Dom.get('toast');
     el.textContent = msg;
-    el.classList.add('show');
+    el.classList.add('toast--show');
     clearTimeout(timer);
-    timer = setTimeout(() => el.classList.remove('show'), duration);
+    timer = setTimeout(() => el.classList.remove('toast--show'), duration);
   }
 
   return { show };
 })();
 
-/* ── LEVEL UP POPUP ─────────────────────────────────────────── */
-const LevelUpPopup = (() => {
-  let el = null;
+/* ================================================================
+   LEVEL UP POPUP
+   ================================================================ */
+const LevelPopup = (() => {
+  let closeTimer = null;
+
+  /**
+   * @param {number} lvl
+   * @param {string} lang
+   */
+  function show(lvl, lang) {
+    const popup = Dom.get('popup-levelup');
+    Dom.text('popup-eyebrow', T[lang].popupEyebrow);
+    Dom.text('popup-level',   T[lang].popupLevel(lvl));
+    popup.hidden = false;
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(hide, CONFIG.LEVELUP_AUTO_CLOSE);
+  }
+
+  function hide() {
+    Dom.get('popup-levelup').hidden = true;
+  }
 
   function init() {
-    el = document.createElement('div');
-    el.className = 'levelup-popup';
-    el.innerHTML = `
-      <div class="levelup-popup__inner">
-        <div class="levelup-popup__title" id="popup-title"></div>
-        <div class="levelup-popup__level" id="popup-level"></div>
-        <button class="levelup-popup__close" id="popup-close">OK</button>
-      </div>`;
-    document.body.appendChild(el);
-    document.getElementById('popup-close').addEventListener('click', hide);
+    Dom.get('popup-close').addEventListener('click', hide);
+    Dom.get('popup-levelup').addEventListener('click', (e) => {
+      if (e.target === Dom.get('popup-levelup') ||
+          e.target.classList.contains('popup__backdrop')) hide();
+    });
   }
 
-  function show(lvl, lang) {
-    if (!el) init();
-    document.getElementById('popup-title').textContent = T[lang].popupTitle;
-    document.getElementById('popup-level').textContent = T[lang].popupSub(lvl);
-    el.classList.add('show');
-    setTimeout(hide, CONFIG.LEVELUP_HIDE);
-  }
-
-  function hide() { el?.classList.remove('show'); }
-
-  return { show };
+  return { show, hide, init };
 })();
 
-/* ── GAME ───────────────────────────────────────────────────── */
+/* ================================================================
+   HISTORY
+   Affiche les dernières réponses sous forme de chips
+   ================================================================ */
+const History = (() => {
+  /** @type {Array<{name: string, correct: boolean}>} */
+  const entries = [];
+
+  /**
+   * @param {string} name
+   * @param {boolean} correct
+   */
+  function push(name, correct) {
+    entries.unshift({ name, correct });
+    if (entries.length > CONFIG.HISTORY_MAX) entries.pop();
+    render();
+  }
+
+  function render() {
+    const container = Dom.get('history');
+    container.innerHTML = entries.map(e => `
+      <span class="history__chip history__chip--${e.correct ? 'correct' : 'wrong'}">
+        ${e.correct ? '✓' : '✗'} ${e.name}
+      </span>
+    `).join('');
+  }
+
+  return { push };
+})();
+
+/* ================================================================
+   GAME
+   Machine d'état principale
+   ================================================================ */
 const Game = (() => {
-  /* State */
+
+  /* ── State ── */
+  /** @type {PokemonPayload|null} */
   let current       = null;
+  /** @type {Promise<PokemonPayload>|null} */
   let nextPromise   = null;
+  /** @type {'fr'|'en'} */
   let lang          = 'fr';
   let score         = { correct: 0, wrong: 0 };
   let hintStep      = 0;
@@ -387,6 +491,11 @@ const Game = (() => {
     return Math.floor(Math.random() * CONFIG.MAX_POKEMON_ID) + 1;
   }
 
+  /**
+   * Normalise une chaîne pour comparaison souple
+   * @param {string} s
+   * @returns {string}
+   */
   function normalize(s) {
     return s
       .toLowerCase()
@@ -395,132 +504,136 @@ const Game = (() => {
       .replace(/[^a-z0-9]/g, '');
   }
 
+  /**
+   * @returns {{en: string, fr: string}}
+   */
   function getNames() {
     if (!current) return { en: '', fr: '' };
-    const find = (lang) =>
-      current.species.names.find(n => n.language.name === lang)?.name
+    const find = (lg) =>
+      current.species.names.find(n => n.language.name === lg)?.name
       ?? current.data.name;
     return { en: find('en'), fr: find('fr') };
   }
 
-  /* ── Save / Load ── */
+  /* ── Persist ── */
   function persist() {
     Storage.save({
       level,
       xp,
       correct       : score.correct,
       wrong         : score.wrong,
-      muted         : Audio.isMuted(),
+      muted         : Sfx.isMuted(),
       lastPokemonId : current?.data?.id ?? lastPokemonId,
       wasRevealed   : revealed,
     });
   }
 
-  function loadSave() {
+  function restoreSave() {
     const s = Storage.load();
     if (!s) return;
     level         = s.level   || 1;
     xp            = s.xp      || 0;
     score.correct = s.correct || 0;
     score.wrong   = s.wrong   || 0;
-    lastPokemonId = s.lastPokemonId || null;
-    wasRevealed   = s.wasRevealed   || false;
+    lastPokemonId = s.lastPokemonId ?? null;
+    wasRevealed   = s.wasRevealed   ?? false;
     if (s.muted) {
-      Audio.setMuted(true);
-      const btnMute = Dom.get('btn-mute');
-      if (btnMute) {
-        btnMute.querySelector('.btn__top').textContent = '🔇';
-        btnMute.classList.add('btn--muted');
-      }
+      Sfx.setMuted(true);
+      syncMuteBtn();
     }
   }
 
-  /* ── UI updates ── */
-  function updateScore() {
-    Dom.setHtml('score-display', `✓ ${score.correct} &nbsp;✗ ${score.wrong}`);
+  /* ── UI ── */
+  function syncMuteBtn() {
+    const on  = document.getElementById('icon-sound-on');
+    const off = document.getElementById('icon-sound-off');
+    if (!on || !off) return;
+    on.style.display  = Sfx.isMuted() ? 'none'  : '';
+    off.style.display = Sfx.isMuted() ? ''      : 'none';
   }
 
-  function updateLevelDisplay() {
-    Dom.setText('level-display', T[lang].levelLabel(level, xp));
-    const fill = Dom.get('xp-bar-fill');
-    if (fill) fill.style.width = `${(xp / CONFIG.LEVEL_THRESHOLD) * 100}%`;
+  function updateScore() {
+    Dom.text('score-correct', score.correct);
+    Dom.text('score-wrong',   score.wrong);
+  }
+
+  function updateXP() {
+    const pct    = xp / CONFIG.LEVEL_THRESHOLD;
+    const offset = CONFIG.XP_CIRC * (1 - pct);
+    const fill   = Dom.get('xp-ring-fill');
+    if (fill) fill.style.strokeDashoffset = offset;
+    Dom.text('level-num', level);
+    Dom.text('xp-label',  T[lang].xpLabel(xp));
+    const bar = Dom.get('xp-bar-fill');
+    if (bar) bar.style.width = `${pct * 100}%`;
   }
 
   function applyLang() {
     const t = T[lang];
-    Dom.setText('input-label', t.inputLabel);
+    Dom.text('input-label', t.inputLabel);
     Dom.get('guess-input').placeholder = t.inputPH;
-    Dom.setText('screen-label', t.screenLabel);
-    Dom.get('btn-guess').querySelector('.btn__top').textContent   = t.btnGuess;
-    Dom.get('btn-new').querySelector('.btn__top').textContent     = t.btnNew;
-    Dom.get('btnHint').querySelector('.btn__top').textContent     = t.btnHint;
-    Dom.get('btnReveal').querySelector('.btn__top').textContent   = t.btnReveal;
-
-    const status = Dom.get('status-text').textContent;
-    if (status === T.fr.statusReady || status === T.en.statusReady) {
-      Dom.setText('status-text', t.statusReady);
-    }
+    Dom.text('lbl-correct', t.lblCorrect);
+    Dom.text('lbl-wrong',   t.lblWrong);
+    Dom.text('lbl-level',   t.lblLevel);
+    Dom.text('lbl-new',     t.lblNew);
+    Dom.text('lbl-hint',    t.lblHint);
+    Dom.text('lbl-reveal',  t.lblReveal);
+    Dom.text('lang-label',  lang.toUpperCase());
+    updateXP();
     updateScore();
-    updateLevelDisplay();
+    if (revealed && current) {
+      const names = getNames();
+      Dom.text('pokemon-name', (lang === 'fr' ? names.fr : names.en).toUpperCase());
+    }
   }
 
-  /* ── Screen transitions ── */
+  /* ── Statut écran ── */
+  const STATUS_CLASSES = ['screen__status--correct', 'screen__status--wrong', 'screen__status--reveal'];
+
+  /**
+   * @param {string} msg
+   * @param {'correct'|'wrong'|'reveal'|''} [type]
+   */
+  function setStatus(msg, type = '') {
+    const el = Dom.get('screen-status');
+    STATUS_CLASSES.forEach(c => el.classList.remove(c));
+    if (type) el.classList.add(`screen__status--${type}`);
+    Dom.text('status-text', msg);
+  }
+
+  /* ── Screen states ── */
+  const SCREEN_CLASSES = ['screen--exit', 'screen--revealed', 'screen--correct', 'screen--loading'];
+
+  function clearScreen(...keep) {
+    const s = Dom.get('screen');
+    SCREEN_CLASSES.forEach(c => { if (!keep.includes(c)) s.classList.remove(c); });
+  }
+
   async function exitScreen() {
-    const img = Dom.get('pokemon-img');
-    img.style.animation = 'none';
-    img.style.filter    = 'brightness(0)';
+    clearScreen();
     Dom.get('screen').classList.add('screen--exit');
-    await sleep(300);
-  }
-
-  function resetImgStyle() {
-    const img = Dom.get('pokemon-img');
-    img.style.transition = '';
-    img.style.filter     = '';
-    img.style.opacity    = '';
-    img.style.transform  = '';
-  }
-
-  /* ── Shake animation ── */
-  function shake(node) {
-    node.classList.remove('shake');
-    void node.offsetWidth;
-    node.classList.add('shake');
-    node.addEventListener('animationend', () => node.classList.remove('shake'), { once: true });
-  }
-
-  /* ── XP / Level ── */
-  function addXP() {
-    xp++;
-    if (xp >= CONFIG.LEVEL_THRESHOLD) {
-      xp = 0;
-      level++;
-      triggerLevelUp();
-    }
-    updateLevelDisplay();
-  }
-
-  function triggerLevelUp() {
-    Audio.playLevelUp();
-    LevelUpPopup.show(level, lang);
-    const lvlDisplay = Dom.get('level-display');
-    if (lvlDisplay) {
-      lvlDisplay.classList.add('level-up-flash');
-      setTimeout(() => lvlDisplay.classList.remove('level-up-flash'), 1500);
-    }
+    await sleep(280);
   }
 
   /* ── Reveal ── */
   function revealPokemon(correct) {
     revealed = true;
-    resetImgStyle();
     const screen = Dom.get('screen');
+    clearScreen();
     screen.classList.add('screen--revealed');
-    if (correct) screen.classList.add('screen--flash');
-    const names       = getNames();
+    if (correct) {
+      screen.classList.add('screen--correct');
+      Dom.get('pokemon-img').style.filter = 'none drop-shadow(0 0 40px rgba(0,229,160,0.4))';
+    } else {
+      Dom.get('pokemon-img').style.filter = 'none';
+    }
+    const names = getNames();
     const displayName = (lang === 'fr' ? names.fr : names.en).toUpperCase();
-    Dom.setText('pokemon-name', displayName);
-    if (correct) Dom.get('pokemon-name').classList.add('correct');
+    Dom.text('pokemon-name', displayName);
+    const revealEl = Dom.get('reveal-name');
+    revealEl.classList.remove('reveal-name--show');
+    void revealEl.offsetWidth;
+    revealEl.classList.add('reveal-name--show');
     persist();
   }
 
@@ -529,21 +642,39 @@ const Game = (() => {
     nextPromise = Api.loadPokemon(randomId()).catch(() => { nextPromise = null; });
   }
 
+  /* ── XP ── */
+  function addXP() {
+    xp++;
+    if (xp >= CONFIG.LEVEL_THRESHOLD) {
+      xp = 0;
+      level++;
+      onLevelUp();
+    }
+    updateXP();
+  }
+
+  function onLevelUp() {
+    Sfx.playLevelUp();
+    LevelPopup.show(level, lang);
+    const el = Dom.get('level-num');
+    if (el) Dom.pulse(el, 'level-flash', 1200);
+    Toast.show(T[lang].toastLevelUp(level), CONFIG.TOAST_LONG);
+  }
+
   /* ── New Pokémon ── */
   async function newPokemon() {
     if (loading) return;
     loading  = true;
     hintStep = 0;
 
-    const screen = Dom.get('screen');
-    const input  = Dom.get('guess-input');
+    const input = Dom.get('guess-input');
 
     await exitScreen();
 
-    screen.classList.remove('screen--revealed', 'screen--flash', 'screen--exit');
-    Dom.setText('pokemon-name', '');
-    Dom.get('pokemon-name').classList.remove('correct');
-    Dom.setText('status-text', T[lang].statusLoad);
+    clearScreen();
+    Dom.text('pokemon-name', '');
+    Dom.get('reveal-name').classList.remove('reveal-name--show');
+    setStatus(T[lang].statusLoad);
     input.value = '';
     input.classList.remove('shake');
     input.blur();
@@ -554,29 +685,34 @@ const Game = (() => {
       current     = payload;
       revealed    = false;
 
-      resetImgStyle();
-      Dom.get('pokemon-img').src = payload.imgUrl;
-      Dom.setText('status-text', T[lang].statusReady);
+      const img = Dom.get('pokemon-img');
+      img.src           = payload.imgUrl;
+      img.style.filter  = 'brightness(0) drop-shadow(0 0 30px rgba(255,255,255,0.08))';
+      img.style.opacity = '';
+      img.style.transform = '';
+
+      setStatus(T[lang].statusReady);
       loading = false;
       persist();
       prefetchNext();
-      if (!('ontouchstart' in window)) Dom.get('guess-input').focus();
+
+      if (!('ontouchstart' in window)) input.focus();
     } catch (err) {
       loading = false;
-      console.error('newPokemon error:', err);
-      Dom.setText('status-text', T[lang].errLabel);
+      console.error('[Game] newPokemon error:', err);
+      setStatus(T[lang].errRetry, 'wrong');
       Toast.show(T[lang].errRetry, CONFIG.TOAST_LONG);
     }
   }
 
   /* ── Check guess ── */
   function check() {
-    if (!current || revealed) return;
+    if (!current || revealed || loading) return;
     const input = Dom.get('guess-input');
     const guess = input.value.trim();
     if (!guess) return;
 
-    input.blur(); /* ferme le clavier mobile */
+    input.blur();
 
     const names     = getNames();
     const isCorrect =
@@ -586,102 +722,113 @@ const Game = (() => {
     if (isCorrect) {
       score.correct++;
       addXP();
-      Audio.play('correct');
+      Sfx.play('correct');
       revealPokemon(true);
-      Dom.setText('status-text', T[lang].statusCorrect);
+      setStatus(T[lang].statusCorrect, 'correct');
       Toast.show(T[lang].toastCorrect);
+      History.push((lang === 'fr' ? names.fr : names.en).toUpperCase(), true);
+      updateScore();
       setTimeout(newPokemon, CONFIG.AUTO_NEXT_DELAY);
     } else {
-          score.wrong++;
-          Audio.play('wrong');
-          shake(input);
-          Dom.setText('status-text', T[lang].statusWrong);
-          Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
-          if ('ontouchstart' in window) input.blur();
-          else input.focus();
-        }
-    updateScore();
+      score.wrong++;
+      Sfx.play('wrong');
+      Dom.shake(input);
+      setStatus(T[lang].statusWrong, 'wrong');
+      Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
+      History.push(guess.toUpperCase(), false);
+      updateScore();
+      persist();
+      if (!('ontouchstart' in window)) setTimeout(() => input.focus(), 50);
+    }
   }
 
   /* ── Reveal button ── */
   function reveal() {
-    if (!current) return;
+    if (!current || loading) return;
     if (revealed) {
-      Audio.play('ui');
-      Toast.show(T[lang].toastNoMore);
+      Sfx.play('ui');
+      Toast.show(T[lang].toastNoMore, CONFIG.TOAST_SHORT);
       return;
     }
-    Audio.play('reveal');
+    Sfx.play('reveal');
     revealPokemon(false);
-    Dom.setText('status-text', T[lang].statusReveal);
+    setStatus(T[lang].statusReveal, 'reveal');
     Toast.show(T[lang].toastReveal, CONFIG.REVEAL_DELAY);
   }
 
   /* ── Hint ── */
   function hint() {
-    if (!current) return;
+    if (!current || loading) return;
     if (revealed) {
-      Audio.play('ui');
-      Toast.show(T[lang].toastNoMore);
+      Sfx.play('ui');
+      Toast.show(T[lang].toastNoMore, CONFIG.TOAST_SHORT);
       return;
     }
-    Audio.play('hint');
+    Sfx.play('hint');
     const names   = getNames();
     const name    = lang === 'fr' ? names.fr : names.en;
     const len     = CONFIG.HINT_STEPS[Math.min(hintStep, CONFIG.HINT_STEPS.length - 1)];
     hintStep      = Math.min(hintStep + 1, CONFIG.HINT_STEPS.length - 1);
     const hintStr = name.slice(0, len).toUpperCase() + '...';
     const hintMsg = T[lang].hint(hintStr);
-    Dom.setText('status-text', hintMsg);
+    setStatus(hintMsg);
     Toast.show(T[lang].toastHint(hintMsg), CONFIG.TOAST_LONG);
   }
 
   /* ── Toggle lang ── */
   function toggleLang() {
-    Audio.play('ui');
+    Sfx.play('ui');
     lang = lang === 'fr' ? 'en' : 'fr';
-    requestAnimationFrame(() => {
-      applyLang();
-      if (revealed && current) {
-        const names = getNames();
-        Dom.setText('pokemon-name', (lang === 'fr' ? names.fr : names.en).toUpperCase());
-      }
-    });
+    requestAnimationFrame(applyLang);
   }
 
   /* ── Toggle mute ── */
   function toggleMute() {
-    Audio.setMuted(!Audio.isMuted());
-    const btnMute = Dom.get('btn-mute');
-    if (btnMute) {
-      btnMute.querySelector('.btn__top').textContent = Audio.isMuted() ? '🔇' : '🔊';
-      btnMute.classList.toggle('btn--muted', Audio.isMuted());
-    }
+    Sfx.setMuted(!Sfx.isMuted());
+    syncMuteBtn();
     persist();
+  }
+
+  /* ── Event binding ── */
+  function bindEvents() {
+    Dom.get('btn-guess').addEventListener('click',  () => { Sfx.play('ui'); check(); });
+    Dom.get('btn-new').addEventListener('click',    () => { Sfx.play('newmon'); newPokemon(); });
+    Dom.get('btn-lang').addEventListener('click',   toggleLang);
+    Dom.get('btn-hint').addEventListener('click',   hint);
+    Dom.get('btn-reveal').addEventListener('click', reveal);
+    Dom.get('btn-mute').addEventListener('click',   toggleMute);
+
+    Dom.get('guess-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { Sfx.play('ui'); check(); }
+    });
+
+    /* Empêche zoom iOS sur double-tap boutons */
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
+    });
   }
 
   /* ── Init ── */
   async function init() {
-    Dom.init();
-    loadSave();
+    restoreSave();
     applyLang();
-    updateLevelDisplay();
-    Audio.preload();
+    updateScore();
+    LevelPopup.init();
+    Sfx.preload();
 
-    /* Restaure la session précédente si possible */
     if (lastPokemonId !== null) {
       try {
         const payload = await Api.loadPokemon(lastPokemonId);
         current  = payload;
         revealed = wasRevealed;
-        Dom.get('pokemon-img').src = payload.imgUrl;
+        const img = Dom.get('pokemon-img');
+        img.src = payload.imgUrl;
 
         if (revealed) {
           revealPokemon(false);
         } else {
-          resetImgStyle();
-          Dom.get('pokemon-img').style.filter = 'brightness(0)';
-          Dom.setText('status-text', T[lang].statusReady);
+          img.style.filter = 'brightness(0) drop-shadow(0 0 30px rgba(255,255,255,0.08))';
+          setStatus(T[lang].statusReady);
         }
         prefetchNext();
       } catch {
@@ -691,16 +838,11 @@ const Game = (() => {
       newPokemon();
     }
 
-    /* Écouteurs */
-    Dom.get('btn-guess').addEventListener('click', () => { Audio.play('ui'); check(); });
-    Dom.get('btn-new').addEventListener('click',   () => { Audio.play('newmon'); newPokemon(); });
-    Dom.get('btn-lang').addEventListener('click',  toggleLang);
-    Dom.get('btnHint').addEventListener('click',   hint);
-    Dom.get('btnReveal').addEventListener('click', reveal);
-    Dom.get('btn-mute')?.addEventListener('click', toggleMute);
-    document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    bindEvents();
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { newPokemon, toggleLang, check, reveal, hint };
+
+  /* API publique minimale */
+  return { newPokemon, check, reveal, hint, toggleLang };
 })();

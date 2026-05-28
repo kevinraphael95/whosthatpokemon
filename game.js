@@ -42,14 +42,13 @@ const T = {
     statusCorrect: 'CORRECT !',
     statusWrong  : 'RÉESSAIE !',
     statusReveal : 'RÉVÉLÉ',
-    lblCorrect   : 'CORRECT',
-    lblWrong     : 'RATÉ',
-    lblLevel     : 'NIVEAU',
-    lblNew       : 'NOUVEAU POKÉMON',
-    lblHint      : 'INDICE',
-    lblReveal    : 'RÉVÉLER',
+    btnGuess     : 'DEVINER',
+    btnNew       : '— NOUVEAU POKÉMON —',
+    btnHint      : 'INDICE',
+    btnReveal    : 'RÉVÉLER',
     popupEyebrow : 'LEVEL UP',
     popupLevel   : (lvl) => `NIVEAU ${lvl}`,
+    levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${CONFIG.LEVEL_THRESHOLD} XP`,
     hint         : (l)   => `COMMENCE PAR : ${l}`,
     toastCorrect : '✓ BONNE RÉPONSE !',
     toastWrong   : '✗ RÉESSAIE !',
@@ -57,7 +56,6 @@ const T = {
     toastHint    : (h)   => `💡 ${h}`,
     toastNoMore  : 'CHARGE UN NOUVEAU POKÉMON',
     toastLevelUp : (lvl) => `🏆 NIVEAU ${lvl} !`,
-    xpLabel      : (xp)  => `${xp} / ${CONFIG.LEVEL_THRESHOLD} XP`,
     errRetry     : 'ERREUR API — RÉESSAIE',
   },
   en: {
@@ -68,14 +66,13 @@ const T = {
     statusCorrect: 'CORRECT!',
     statusWrong  : 'TRY AGAIN!',
     statusReveal : 'REVEALED',
-    lblCorrect   : 'CORRECT',
-    lblWrong     : 'WRONG',
-    lblLevel     : 'LEVEL',
-    lblNew       : 'NEW POKÉMON',
-    lblHint      : 'HINT',
-    lblReveal    : 'REVEAL',
+    btnGuess     : 'GUESS',
+    btnNew       : '— NEW POKÉMON —',
+    btnHint      : 'HINT',
+    btnReveal    : 'REVEAL',
     popupEyebrow : 'LEVEL UP',
     popupLevel   : (lvl) => `LEVEL ${lvl}`,
+    levelLabel   : (lvl, xp) => `LVL ${lvl}  ·  ${xp}/${CONFIG.LEVEL_THRESHOLD} XP`,
     hint         : (l)   => `STARTS WITH: ${l}`,
     toastCorrect : '✓ CORRECT!',
     toastWrong   : '✗ TRY AGAIN!',
@@ -83,7 +80,6 @@ const T = {
     toastHint    : (h)   => `💡 ${h}`,
     toastNoMore  : 'LOAD A NEW POKEMON',
     toastLevelUp : (lvl) => `🏆 LEVEL ${lvl}!`,
-    xpLabel      : (xp)  => `${xp} / ${CONFIG.LEVEL_THRESHOLD} XP`,
     errRetry     : 'API ERROR — RETRY',
   },
 };
@@ -390,9 +386,9 @@ const Toast = (() => {
   function show(msg, duration = CONFIG.TOAST_DEFAULT) {
     if (!el) el = Dom.get('toast');
     el.textContent = msg;
-    el.classList.add('toast--show');
+    el.classList.add('show');
     clearTimeout(timer);
-    timer = setTimeout(() => el.classList.remove('toast--show'), duration);
+    timer = setTimeout(() => el.classList.remove('show'), duration);
   }
 
   return { show };
@@ -409,24 +405,20 @@ const LevelPopup = (() => {
    * @param {string} lang
    */
   function show(lvl, lang) {
-    const popup = Dom.get('popup-levelup');
-    Dom.text('popup-eyebrow', T[lang].popupEyebrow);
-    Dom.text('popup-level',   T[lang].popupLevel(lvl));
-    popup.hidden = false;
+    const popup = document.getElementById('popup-levelup');
+    Dom.text('popup-title', T[lang].popupEyebrow);
+    Dom.text('popup-level', T[lang].popupLevel(lvl));
+    popup?.classList.add('show');
     clearTimeout(closeTimer);
     closeTimer = setTimeout(hide, CONFIG.LEVELUP_AUTO_CLOSE);
   }
 
   function hide() {
-    Dom.get('popup-levelup').hidden = true;
+    document.getElementById('popup-levelup')?.classList.remove('show');
   }
 
   function init() {
-    Dom.get('popup-close').addEventListener('click', hide);
-    Dom.get('popup-levelup').addEventListener('click', (e) => {
-      if (e.target === Dom.get('popup-levelup') ||
-          e.target.classList.contains('popup__backdrop')) hide();
-    });
+    document.getElementById('popup-close')?.addEventListener('click', hide);
   }
 
   return { show, hide, init };
@@ -515,6 +507,11 @@ const Game = (() => {
     return { en: find('en'), fr: find('fr') };
   }
 
+  /* ── Compat IDs ── */
+  // btn-hint / btn-reveal ont des tirets dans ce HTML
+  function getHintBtn()   { return document.getElementById('btn-hint'); }
+  function getRevealBtn() { return document.getElementById('btn-reveal'); }
+
   /* ── Persist ── */
   function persist() {
     Storage.save({
@@ -545,42 +542,35 @@ const Game = (() => {
 
   /* ── UI ── */
   function syncMuteBtn() {
-    const on  = document.getElementById('icon-sound-on');
-    const off = document.getElementById('icon-sound-off');
-    if (!on || !off) return;
-    on.style.display  = Sfx.isMuted() ? 'none'  : '';
-    off.style.display = Sfx.isMuted() ? ''      : 'none';
+    const btn = Dom.get('btn-mute');
+    if (!btn) return;
+    btn.querySelector('.btn__top').textContent = Sfx.isMuted() ? '🔇' : '🔊';
+    btn.classList.toggle('btn--muted', Sfx.isMuted());
   }
 
   function updateScore() {
-    Dom.text('score-correct', score.correct);
-    Dom.text('score-wrong',   score.wrong);
+    Dom.html('score-display', `✓ ${score.correct} &nbsp;✗ ${score.wrong}`);
   }
 
   function updateXP() {
-    const pct    = xp / CONFIG.LEVEL_THRESHOLD;
-    const offset = CONFIG.XP_CIRC * (1 - pct);
-    const fill   = Dom.get('xp-ring-fill');
-    if (fill) fill.style.strokeDashoffset = offset;
-    Dom.text('level-num', level);
-    Dom.text('xp-label',  T[lang].xpLabel(xp));
+    const pct = xp / CONFIG.LEVEL_THRESHOLD;
     const bar = Dom.get('xp-bar-fill');
     if (bar) bar.style.width = `${pct * 100}%`;
+    Dom.text('level-display', T[lang].levelLabel(level, xp));
   }
 
   function applyLang() {
     const t = T[lang];
     Dom.text('input-label', t.inputLabel);
     Dom.get('guess-input').placeholder = t.inputPH;
-    Dom.text('lbl-correct', t.lblCorrect);
-    Dom.text('lbl-wrong',   t.lblWrong);
-    Dom.text('lbl-level',   t.lblLevel);
-    Dom.text('lbl-new',     t.lblNew);
-    Dom.text('lbl-hint',    t.lblHint);
-    Dom.text('lbl-reveal',  t.lblReveal);
-    Dom.text('lang-label',  lang.toUpperCase());
-    updateXP();
+    Dom.get('btn-guess').querySelector('.btn__top').textContent = t.btnGuess;
+    Dom.get('btn-new').querySelector('.btn__top').textContent   = t.btnNew;
+    const bh = getHintBtn();   if (bh) bh.querySelector('.btn__top').textContent   = t.btnHint;
+    const br = getRevealBtn(); if (br) br.querySelector('.btn__top').textContent   = t.btnReveal;
+    const st = Dom.get('status-text')?.textContent;
+    if (st === T.fr.statusReady || st === T.en.statusReady) Dom.text('status-text', t.statusReady);
     updateScore();
+    updateXP();
     if (revealed && current) {
       const names = getNames();
       Dom.text('pokemon-name', (lang === 'fr' ? names.fr : names.en).toUpperCase());
@@ -588,16 +578,7 @@ const Game = (() => {
   }
 
   /* ── Statut écran ── */
-  const STATUS_CLASSES = ['screen__status--correct', 'screen__status--wrong', 'screen__status--reveal'];
-
-  /**
-   * @param {string} msg
-   * @param {'correct'|'wrong'|'reveal'|''} [type]
-   */
-  function setStatus(msg, type = '') {
-    const el = Dom.get('screen-status');
-    STATUS_CLASSES.forEach(c => el.classList.remove(c));
-    if (type) el.classList.add(`screen__status--${type}`);
+  function setStatus(msg, _type = '') {
     Dom.text('status-text', msg);
   }
 
@@ -621,19 +602,14 @@ const Game = (() => {
     const screen = Dom.get('screen');
     clearScreen();
     screen.classList.add('screen--revealed');
-    if (correct) {
-      screen.classList.add('screen--correct');
-      Dom.get('pokemon-img').style.filter = 'none drop-shadow(0 0 40px rgba(0,229,160,0.4))';
-    } else {
-      Dom.get('pokemon-img').style.filter = 'none';
-    }
+    if (correct) screen.classList.add('screen--flash');
+    const img = Dom.get('pokemon-img');
+    img.style.filter = 'none';
+
     const names = getNames();
     const displayName = (lang === 'fr' ? names.fr : names.en).toUpperCase();
     Dom.text('pokemon-name', displayName);
-    const revealEl = Dom.get('reveal-name');
-    revealEl.classList.remove('reveal-name--show');
-    void revealEl.offsetWidth;
-    revealEl.classList.add('reveal-name--show');
+    if (correct) Dom.get('pokemon-name').classList.add('correct');
     persist();
   }
 
@@ -656,8 +632,8 @@ const Game = (() => {
   function onLevelUp() {
     Sfx.playLevelUp();
     LevelPopup.show(level, lang);
-    const el = Dom.get('level-num');
-    if (el) Dom.pulse(el, 'level-flash', 1200);
+    const el = Dom.get('level-display');
+    if (el) Dom.pulse(el, 'level-up-flash', 1500);
     Toast.show(T[lang].toastLevelUp(level), CONFIG.TOAST_LONG);
   }
 
@@ -673,7 +649,7 @@ const Game = (() => {
 
     clearScreen();
     Dom.text('pokemon-name', '');
-    Dom.get('reveal-name').classList.remove('reveal-name--show');
+    Dom.get('pokemon-name').classList.remove('correct');
     setStatus(T[lang].statusLoad);
     input.value = '';
     input.classList.remove('shake');
@@ -724,25 +700,22 @@ const Game = (() => {
       addXP();
       Sfx.play('correct');
       revealPokemon(true);
-      setStatus(T[lang].statusCorrect, 'correct');
+      setStatus(T[lang].statusCorrect);
       Toast.show(T[lang].toastCorrect);
-      History.push((lang === 'fr' ? names.fr : names.en).toUpperCase(), true);
       updateScore();
       setTimeout(newPokemon, CONFIG.AUTO_NEXT_DELAY);
     } else {
       score.wrong++;
       Sfx.play('wrong');
       Dom.shake(input);
-      setStatus(T[lang].statusWrong, 'wrong');
+      setStatus(T[lang].statusWrong);
       Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
-      History.push(guess.toUpperCase(), false);
       updateScore();
       persist();
       if (!('ontouchstart' in window)) setTimeout(() => input.focus(), 50);
     }
   }
 
-  /* ── Reveal button ── */
   function reveal() {
     if (!current || loading) return;
     if (revealed) {
@@ -752,11 +725,10 @@ const Game = (() => {
     }
     Sfx.play('reveal');
     revealPokemon(false);
-    setStatus(T[lang].statusReveal, 'reveal');
+    setStatus(T[lang].statusReveal);
     Toast.show(T[lang].toastReveal, CONFIG.REVEAL_DELAY);
   }
 
-  /* ── Hint ── */
   function hint() {
     if (!current || loading) return;
     if (revealed) {
@@ -794,15 +766,14 @@ const Game = (() => {
     Dom.get('btn-guess').addEventListener('click',  () => { Sfx.play('ui'); check(); });
     Dom.get('btn-new').addEventListener('click',    () => { Sfx.play('newmon'); newPokemon(); });
     Dom.get('btn-lang').addEventListener('click',   toggleLang);
-    Dom.get('btn-hint').addEventListener('click',   hint);
-    Dom.get('btn-reveal').addEventListener('click', reveal);
     Dom.get('btn-mute').addEventListener('click',   toggleMute);
+    getHintBtn()?.addEventListener('click',   hint);
+    getRevealBtn()?.addEventListener('click', reveal);
 
     Dom.get('guess-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { Sfx.play('ui'); check(); }
     });
 
-    /* Empêche zoom iOS sur double-tap boutons */
     document.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
     });

@@ -134,7 +134,7 @@ const Api = (() => {
 })();
 
 /* ── AUDIO ──────────────────────────────────────────────────── */
-const Audio = (() => {
+const SoundManager = (() => {
   let actx = null;
   const buffers = {};
 
@@ -410,7 +410,7 @@ const Game = (() => {
       xp,
       correct       : score.correct,
       wrong         : score.wrong,
-      muted         : Audio.isMuted(),
+      muted         : SoundManager.isMuted(),
       lastPokemonId : current?.data?.id ?? lastPokemonId,
       wasRevealed   : revealed,
     });
@@ -426,7 +426,7 @@ const Game = (() => {
     lastPokemonId = s.lastPokemonId || null;
     wasRevealed   = s.wasRevealed   || false;
     if (s.muted) {
-      Audio.setMuted(true);
+      SoundManager.setMuted(true);
       const btnMute = Dom.get('btn-mute');
       if (btnMute) {
         btnMute.querySelector('.btn__top').textContent = '🔇';
@@ -501,7 +501,7 @@ const Game = (() => {
   }
 
   function triggerLevelUp() {
-    Audio.playLevelUp();
+    SoundManager.playLevelUp();
     LevelUpPopup.show(level, lang);
     const lvlDisplay = Dom.get('level-display');
     if (lvlDisplay) {
@@ -533,6 +533,7 @@ const Game = (() => {
   async function newPokemon() {
     if (loading) return;
     loading  = true;
+    Dom.get('btn-new').disabled = true; // ← AJOUTÉ
     hintStep = 0;
 
     const screen = Dom.get('screen');
@@ -558,11 +559,13 @@ const Game = (() => {
       Dom.get('pokemon-img').src = payload.imgUrl;
       Dom.setText('status-text', T[lang].statusReady);
       loading = false;
+      Dom.get('btn-new').disabled = false; // ← AJOUTÉ
       persist();
       prefetchNext();
       if (!('ontouchstart' in window)) Dom.get('guess-input').focus();
     } catch (err) {
       loading = false;
+      Dom.get('btn-new').disabled = false; // ← AJOUTÉ
       console.error('newPokemon error:', err);
       Dom.setText('status-text', T[lang].errLabel);
       Toast.show(T[lang].errRetry, CONFIG.TOAST_LONG);
@@ -576,7 +579,7 @@ const Game = (() => {
     const guess = input.value.trim();
     if (!guess) return;
 
-    input.blur(); /* ferme le clavier mobile */
+    input.blur();
 
     const names     = getNames();
     const isCorrect =
@@ -586,20 +589,21 @@ const Game = (() => {
     if (isCorrect) {
       score.correct++;
       addXP();
-      Audio.play('correct');
+      SoundManager.play('correct');
       revealPokemon(true);
       Dom.setText('status-text', T[lang].statusCorrect);
       Toast.show(T[lang].toastCorrect);
       setTimeout(newPokemon, CONFIG.AUTO_NEXT_DELAY);
     } else {
-          score.wrong++;
-          Audio.play('wrong');
-          shake(input);
-          Dom.setText('status-text', T[lang].statusWrong);
-          Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
-          if ('ontouchstart' in window) input.blur();
-          else input.focus();
-        }
+      score.wrong++;
+      SoundManager.play('wrong');
+      shake(input);
+      Dom.setText('status-text', T[lang].statusWrong);
+      Toast.show(T[lang].toastWrong, CONFIG.TOAST_SHORT);
+      persist(); // ← AJOUTÉ
+      if ('ontouchstart' in window) input.blur();
+      else input.focus();
+    }
     updateScore();
   }
 
@@ -607,11 +611,11 @@ const Game = (() => {
   function reveal() {
     if (!current) return;
     if (revealed) {
-      Audio.play('ui');
+      SoundManager.play('ui');
       Toast.show(T[lang].toastNoMore);
       return;
     }
-    Audio.play('reveal');
+    SoundManager.play('reveal');
     revealPokemon(false);
     Dom.setText('status-text', T[lang].statusReveal);
     Toast.show(T[lang].toastReveal, CONFIG.REVEAL_DELAY);
@@ -621,11 +625,11 @@ const Game = (() => {
   function hint() {
     if (!current) return;
     if (revealed) {
-      Audio.play('ui');
+      SoundManager.play('ui');
       Toast.show(T[lang].toastNoMore);
       return;
     }
-    Audio.play('hint');
+    SoundManager.play('hint');
     const names   = getNames();
     const name    = lang === 'fr' ? names.fr : names.en;
     const len     = CONFIG.HINT_STEPS[Math.min(hintStep, CONFIG.HINT_STEPS.length - 1)];
@@ -638,7 +642,7 @@ const Game = (() => {
 
   /* ── Toggle lang ── */
   function toggleLang() {
-    Audio.play('ui');
+    SoundManager.play('ui');
     lang = lang === 'fr' ? 'en' : 'fr';
     requestAnimationFrame(() => {
       applyLang();
@@ -651,11 +655,11 @@ const Game = (() => {
 
   /* ── Toggle mute ── */
   function toggleMute() {
-    Audio.setMuted(!Audio.isMuted());
+    SoundManager.setMuted(!SoundManager.isMuted());
     const btnMute = Dom.get('btn-mute');
     if (btnMute) {
-      btnMute.querySelector('.btn__top').textContent = Audio.isMuted() ? '🔇' : '🔊';
-      btnMute.classList.toggle('btn--muted', Audio.isMuted());
+      btnMute.querySelector('.btn__top').textContent = SoundManager.isMuted() ? '🔇' : '🔊';
+      btnMute.classList.toggle('btn--muted', SoundManager.isMuted());
     }
     persist();
   }
@@ -666,7 +670,7 @@ const Game = (() => {
     loadSave();
     applyLang();
     updateLevelDisplay();
-    Audio.preload();
+    SoundManager.preload();
 
     /* Restaure la session précédente si possible */
     if (lastPokemonId !== null) {
@@ -692,8 +696,8 @@ const Game = (() => {
     }
 
     /* Écouteurs */
-    Dom.get('btn-guess').addEventListener('click', () => { Audio.play('ui'); check(); });
-    Dom.get('btn-new').addEventListener('click',   () => { Audio.play('newmon'); newPokemon(); });
+    Dom.get('btn-guess').addEventListener('click', () => { SoundManager.play('ui'); check(); });
+    Dom.get('btn-new').addEventListener('click',   () => { SoundManager.play('newmon'); newPokemon(); });
     Dom.get('btn-lang').addEventListener('click',  toggleLang);
     Dom.get('btnHint').addEventListener('click',   hint);
     Dom.get('btnReveal').addEventListener('click', reveal);

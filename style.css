@@ -75,6 +75,7 @@ body {
   overflow         : hidden;
   position         : relative;
   background       : #111 url('pokemon_wallpaper.png') center / cover no-repeat fixed;
+  overscroll-behavior-y: contain;
 }
 body::before {
   content        : '';

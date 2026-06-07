@@ -49,6 +49,17 @@
   --transition-base   : 0.2s;
   --transition-slow   : 0.4s;
   --ease-bounce       : cubic-bezier(.34, 1.56, .64, 1);
+
+  /* ── Tailles fluides desktop (clamp) ── */
+  --panel-w    : clamp(300px, 38vw, 560px);
+  --screen-min : clamp(200px, 28vw, 420px);
+  --lens-size  : clamp(36px, 4.5vw, 56px);
+  --dot-size   : clamp(8px,  1vw,   12px);
+  --font-btn   : clamp(7px,  0.75vw, 11px);
+  --font-input : clamp(8px,  0.8vw,  11px);
+  --font-status: clamp(5px,  0.55vw,  8px);
+  --font-level : clamp(5px,  0.5vw,   7px);
+  --logo-w     : clamp(90px, 11vw,  140px);
 }
 
 
@@ -125,7 +136,7 @@ body::before {
 
 /* ── Panneau gauche ────────────────────────────────────────── */
 .pokedex__left {
-  width          : 560px;
+  width          : var(--panel-w);
   background     : linear-gradient(160deg, #ef5350 0%, #b71c1c 50%, #7f0000 100%);
   border-radius  : var(--radius-xl) 0 0 var(--radius-xl);
   padding        : 28px 24px 28px 28px;
@@ -168,8 +179,8 @@ body::before {
   z-index     : 2;
 }
 .lens {
-  width         : 56px;
-  height        : 56px;
+  width         : var(--lens-size);
+  height        : var(--lens-size);
   border-radius : 50%;
   background    : radial-gradient(circle at 35% 35%, var(--blue-bright), var(--blue));
   border        : 4px solid rgba(255, 255, 255, 0.3);
@@ -198,8 +209,8 @@ body::before {
 }
 .lens-dots { display: flex; gap: var(--gap-sm); }
 .dot {
-  width         : 12px;
-  height        : 12px;
+  width         : var(--dot-size);
+  height        : var(--dot-size);
   border-radius : 50%;
   box-shadow    : 0 0 6px currentColor, inset 0 2px 2px rgba(255, 255, 255, 0.4);
 }
@@ -235,7 +246,7 @@ body::before {
     0 4px 16px rgba(0, 0, 0, 0.8);
   position       : relative;
   overflow       : hidden;
-  min-height     : 420px;
+  min-height     : var(--screen-min);
   display        : flex;
   align-items    : center;
   justify-content: center;
@@ -281,7 +292,7 @@ body::before {
   top        : 12px;
   left       : 50%;
   transform  : translateX(-50%);
-  width      : 140px;
+  width      : var(--logo-w);
   max-height : 60px;
   object-fit : contain;
   z-index    : 3;
@@ -349,7 +360,7 @@ body::before {
 .screen__overlay.visible { opacity: 1; }
 .screen__prompt {
   font-family : var(--font-pixel);
-  font-size   : 60px;
+  font-size   : clamp(30px, 5vw, 60px);
   color       : var(--screen-green);
   text-shadow : 0 0 20px var(--screen-green), 0 0 40px rgba(155, 188, 15, 0.4);
   animation   : pulse 1.5s ease infinite;
@@ -379,7 +390,7 @@ body::before {
 
 /* ── Charnière ─────────────────────────────────────────────── */
 .hinge {
-  width           : 18px;
+  width           : clamp(10px, 1.2vw, 18px);
   background      : linear-gradient(to right, #3a0000, #550000, #3a0000);
   display         : flex;
   flex-direction  : column;
@@ -400,7 +411,7 @@ body::before {
 
 /* ── Panneau droit ─────────────────────────────────────────── */
 .pokedex__right {
-  width          : 560px;
+  width          : var(--panel-w);
   background     : linear-gradient(160deg, #c62828 0%, #8d0000 50%, #5a0000 100%);
   border-radius  : 0 var(--radius-xl) var(--radius-xl) 0;
   padding        : 28px 28px 28px 24px;
@@ -456,7 +467,7 @@ body::before {
 }
 .mini-screen__status {
   font-family    : var(--font-pixel);
-  font-size      : 8px;
+  font-size      : var(--font-status);
   color          : #0d2000;
   letter-spacing : 2px;
   position       : relative;
@@ -467,7 +478,7 @@ body::before {
 }
 .mini-screen__name {
   font-family    : var(--font-pixel);
-  font-size      : 30px;
+  font-size      : clamp(14px, 2.2vw, 30px);
   font-weight    : 700;
   color          : #0d2000;
   position       : relative;
@@ -519,7 +530,7 @@ body::before {
 .mini-screen__level,
 .mini-screen__score {
   font-family    : var(--font-pixel);
-  font-size      : 7px;
+  font-size      : var(--font-level);
   color          : #1a3000;
   letter-spacing : 1px;
 }
@@ -553,7 +564,7 @@ body::before {
   border-radius  : var(--radius-sm);
   color          : var(--screen-green);
   font-family    : var(--font-pixel);
-  font-size      : 11px;
+  font-size      : var(--font-input);
   padding        : 12px 14px;
   outline        : none;
   letter-spacing : 2px;
@@ -596,7 +607,7 @@ body::before {
   display       : block;
   padding       : 11px 14px;
   border-radius : inherit;
-  font-size     : 11px;
+  font-size     : var(--font-btn);
   transition    : background var(--transition-fast);
 }
 
@@ -633,16 +644,16 @@ body::before {
 
 /* Rouge — Nouveau */
 .btn--new          { background: #1a0000; box-shadow: 0 var(--btn-shadow-height) 0 #080000; }
-.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: 11px; text-align: center; }
+.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: var(--font-btn); text-align: center; }
 .btn--new:hover .btn__top { background: linear-gradient(180deg, #ff7961, #f44336); }
 
 /* Jaune — Indice */
 .btn--hint          { background: #2a2000; box-shadow: 0 var(--btn-shadow-height) 0 #100d00; }
-.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: 11px; text-align: center; }
+.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: var(--font-btn); text-align: center; }
 
 /* Violet — Révéler */
 .btn--reveal          { background: #1a0030; box-shadow: 0 var(--btn-shadow-height) 0 #090015; }
-.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: 11px; text-align: center; }
+.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: var(--font-btn); text-align: center; }
 
 /* Gris — Mute */
 .btn--mute           { background: #1a1a1a; box-shadow: 0 var(--btn-shadow-height) 0 #080808; min-width: 44px; }

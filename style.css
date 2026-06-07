@@ -98,16 +98,18 @@ body::before {
 
 
 /* ── Overlays ──────────────────────────────────────────────── */
-.scanline {
-  pointer-events : none;
-  position       : fixed;
+.screen::after {
+  content        : '';
+  position       : absolute;
   inset          : 0;
-  z-index        : 999;
+  pointer-events : none;
+  z-index        : 10;
   background     : repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 3px,
     rgba(0, 0, 0, 0.08) 3px, rgba(0, 0, 0, 0.08) 4px
   );
+  border-radius  : inherit;
 }
 .noise {
   pointer-events : none;

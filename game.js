@@ -463,16 +463,12 @@ const Game = (() => {
         currentStep === 'guess' ? t.btnGuess : t.btnNext;
     }
 
-    Dom.get('btn-new').querySelector('.btn__top').textContent = t.btnNew;
-
     /* Bouton indice : respecte l'état courant (hint/reveal) */
     const btnHintEl = Dom.get('btnHint');
     if (btnHintEl) {
       btnHintEl.querySelector('.btn__top').textContent =
         hintStep === 0 ? t.btnHint : t.btnReveal;
     }
-    Dom.get('btnReveal')?.querySelector('.btn__top') &&
-      (Dom.get('btnReveal').querySelector('.btn__top').textContent = t.btnReveal);
 
     const status = Dom.get('status-text').textContent;
     if (status === T.fr.statusReady || status === T.en.statusReady) {

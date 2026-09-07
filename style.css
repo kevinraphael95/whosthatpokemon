@@ -597,7 +597,7 @@ body::before {
   font-family               : var(--font-pixel);
   border-radius             : var(--radius-sm);
   padding                   : 0;
-  transition                : transform var(--transition-fast);
+  transition                : transform var(--transition-fast), background var(--transition-base), box-shadow var(--transition-base);
   letter-spacing            : 1px;
   user-select               : none;
   -webkit-tap-highlight-color: transparent;
@@ -627,8 +627,14 @@ body::before {
 }
 .hint-row {
   display               : grid;
-  grid-template-columns : 1fr 1fr;
-  gap                   : var(--gap-sm);
+  grid-template-columns : 1fr;
+}
+.hint-row .btn        { display: flex; flex-direction: column; }
+.hint-row .btn .btn__top {
+  flex            : 1;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
 }
 
 /* ── Variantes de boutons ──────────────────────────────────── */
@@ -638,22 +644,22 @@ body::before {
 .btn--guess .btn__top { background: linear-gradient(180deg, #69f0ae, #43a047); color: #0a1a00; }
 .btn--guess:hover .btn__top { background: linear-gradient(180deg, #76ff99, #4caf50); }
 
+/* Bleu — Suivant (le bouton Deviner bascule dans cet état une fois la manche jouée) */
+.btn--guess.btn--next        { background: #00214a; box-shadow: 0 var(--btn-shadow-height) 0 #000d24; }
+.btn--guess.btn--next .btn__top { background: linear-gradient(180deg, #4fc3f7, #1565c0); color: #001433; }
+.btn--guess.btn--next:hover .btn__top { background: linear-gradient(180deg, #6bd4ff, #1976d2); }
+
 /* Bleu — Langue */
 .btn--lang          { background: #00214a; box-shadow: 0 var(--btn-shadow-height) 0 #000d24; min-width: 60px; }
 .btn--lang .btn__top { background: linear-gradient(180deg, #4fc3f7, #0288d1); color: #001433; font-size: 9px; padding: 11px 8px; }
-
-/* Rouge — Nouveau */
-.btn--new          { background: #1a0000; box-shadow: 0 var(--btn-shadow-height) 0 #080000; }
-.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: var(--font-btn); text-align: center; }
-.btn--new:hover .btn__top { background: linear-gradient(180deg, #ff7961, #f44336); }
 
 /* Jaune — Indice */
 .btn--hint          { background: #2a2000; box-shadow: 0 var(--btn-shadow-height) 0 #100d00; }
 .btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: var(--font-btn); text-align: center; }
 
-/* Violet — Révéler */
-.btn--reveal          { background: #1a0030; box-shadow: 0 var(--btn-shadow-height) 0 #090015; }
-.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: var(--font-btn); text-align: center; }
+/* Violet — Révéler (le bouton Indice bascule dans cet état après le premier indice) */
+.btn--hint.btn--reveal-state          { background: #1a0030; box-shadow: 0 var(--btn-shadow-height) 0 #090015; }
+.btn--hint.btn--reveal-state .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; }
 
 /* Gris — Mute */
 .btn--mute           { background: #1a1a1a; box-shadow: 0 var(--btn-shadow-height) 0 #080808; min-width: 44px; }
@@ -906,7 +912,6 @@ body::before {
   .controls    { gap: var(--gap-sm); }
   .btn__top    { padding: 13px 10px; font-size: 9px; }
   .btn--lang .btn__top { font-size: 9px; padding: 13px 8px; }
-  .btn--new .btn__top  { font-size: 9px; }
   .btn-row     { gap: 7px; }
   .hint-row    { gap: 7px; }
 

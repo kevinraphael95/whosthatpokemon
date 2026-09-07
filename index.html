@@ -75,6 +75,16 @@
     <!-- ── PANNEAU DROIT ─────────────────────────────── -->
     <section class="pokedex__right" aria-label="Contrôles">
 
+      <!-- Réglages : langue et son, séparés des actions de jeu -->
+      <div class="settings-row" role="group" aria-label="Réglages">
+        <button class="icon-btn" id="btn-lang" aria-label="Changer la langue">
+          <span class="btn__top">FR/EN</span>
+        </button>
+        <button class="icon-btn" id="btn-mute" aria-label="Couper le son">
+          <span class="btn__top">🔊</span>
+        </button>
+      </div>
+
       <!-- Mini écran info -->
       <div class="mini-screen" id="mini-screen" aria-live="polite">
         <div class="mini-screen__status" id="status-text"></div>
@@ -106,25 +116,12 @@
           </div>
         </div>
 
-        <!-- Ligne : Deviner / Langue / Son -->
-        <div class="btn-row">
-          <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse">
-            <span class="btn__top">DEVINER</span>
-          </button>
-          <button class="btn btn--lang" id="btn-lang" aria-label="Changer la langue">
-            <span class="btn__top">FR / EN</span>
-          </button>
-          <button class="btn btn--mute" id="btn-mute" aria-label="Couper le son">
-            <span class="btn__top">🔊</span>
-          </button>
-        </div>
-
-        <!-- Nouveau Pokémon -->
-        <button class="btn btn--new" id="btn-new" aria-label="Charger un nouveau Pokémon">
-          <span class="btn__top">— NOUVEAU POKÉMON —</span>
+        <!-- Action primaire -->
+        <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse">
+          <span class="btn__top">DEVINER</span>
         </button>
 
-        <!-- Indice / Révéler -->
+        <!-- Actions secondaires : aide à la réponse -->
         <div class="hint-row">
           <button class="btn btn--hint" aria-label="Obtenir un indice">
             <span class="btn__top">INDICE</span>
@@ -133,6 +130,11 @@
             <span class="btn__top">RÉVÉLER</span>
           </button>
         </div>
+
+        <!-- Action tertiaire : passer, discrète -->
+        <button class="btn btn--new" id="btn-new" aria-label="Charger un nouveau Pokémon">
+          <span class="btn__top">NOUVEAU POKÉMON</span>
+        </button>
 
       </div>
 

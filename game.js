@@ -32,7 +32,6 @@ const T = {
     statusWrong  : 'MAUVAISE RÉP.',
     statusReveal : 'RÉVÉLÉ',
     btnGuess     : 'DEVINER',
-    btnNext      : 'SUIVANT',
     btnNew       : '— NOUVEAU POKÉMON —',
     btnHint      : 'INDICE',
     btnReveal    : 'RÉVÉLER',
@@ -60,7 +59,6 @@ const T = {
     statusWrong  : 'WRONG !',
     statusReveal : 'REVEALED',
     btnGuess     : 'GUESS',
-    btnNext      : 'NEXT',
     btnNew       : '— NEW POKÉMON —',
     btnHint      : 'HINT',
     btnReveal    : 'REVEAL',
@@ -374,8 +372,7 @@ const Game = (() => {
   let nextPromise   = null;
   let lang          = 'fr';
   let score         = { correct: 0, wrong: 0 };
-  let hintStep      = 0;        // 0 = pas d'indice donné · >0 = indice(s) déjà donné(s)
-  let currentStep   = 'guess';  // 'guess' | 'next' — état du bouton principal
+  let hintStep      = 0;
   let revealed      = false;
   let loading       = false;
   let level         = 1;
@@ -454,21 +451,10 @@ const Game = (() => {
     Dom.setText('input-label', t.inputLabel);
     Dom.get('guess-input').placeholder = t.inputPH;
     Dom.setText('screen-label', t.screenLabel);
-
-    /* Bouton principal : respecte l'état courant (guess/next) au lieu
-       d'écraser bêtement le libellé au changement de langue */
-    const btnGuessEl = Dom.get('btn-guess');
-    if (btnGuessEl) {
-      btnGuessEl.querySelector('.btn__top').textContent =
-        currentStep === 'guess' ? t.btnGuess : t.btnNext;
-    }
-
-    /* Bouton indice : respecte l'état courant (hint/reveal) */
-    const btnHintEl = Dom.get('btnHint');
-    if (btnHintEl) {
-      btnHintEl.querySelector('.btn__top').textContent =
-        hintStep === 0 ? t.btnHint : t.btnReveal;
-    }
+    Dom.get('btn-guess').querySelector('.btn__top').textContent   = t.btnGuess;
+    Dom.get('btn-new').querySelector('.btn__top').textContent     = t.btnNew;
+    Dom.get('btnHint').querySelector('.btn__top').textContent     = t.btnHint;
+    Dom.get('btnReveal').querySelector('.btn__top').textContent   = t.btnReveal;
 
     const status = Dom.get('status-text').textContent;
     if (status === T.fr.statusReady || status === T.en.statusReady) {
@@ -543,66 +529,11 @@ const Game = (() => {
     nextPromise = Api.loadPokemon(randomId()).catch(() => { nextPromise = null; });
   }
 
-  /* ── Boutons d'action (guess/next, hint/reveal) ──────────────
-     Le bouton principal sert soit à valider une réponse ('guess'),
-     soit à passer au Pokémon suivant une fois la manche terminée
-     ('next'). Le bouton indice sert d'abord à donner un indice,
-     puis devient "Révéler" au deuxième appui. */
-  function resetActionButtons() {
-    currentStep = 'guess';
-    hintStep    = 0;
-    const t = T[lang];
-
-    const btnGuess = Dom.get('btn-guess');
-    if (btnGuess) {
-      btnGuess.querySelector('.btn__top').textContent = t.btnGuess;
-      btnGuess.classList.remove('btn--next');
-    }
-    const btnHint = Dom.get('btnHint');
-    if (btnHint) {
-      btnHint.querySelector('.btn__top').textContent = t.btnHint;
-      btnHint.classList.remove('btn--reveal-state');
-    }
-  }
-
-  function setNextState() {
-    currentStep = 'next';
-    const btnGuess = Dom.get('btn-guess');
-    if (btnGuess) {
-      btnGuess.querySelector('.btn__top').textContent = T[lang].btnNext;
-      btnGuess.classList.add('btn--next');
-    }
-  }
-
-  function handleMainAction() {
-    if (currentStep === 'guess') {
-      Audio.play('ui');
-      check();
-    } else {
-      Audio.play('newmon');
-      newPokemon(); // resetActionButtons() est appelé à l'intérieur
-    }
-  }
-
-  function handleHintAction() {
-    const btnHint = Dom.get('btnHint');
-    if (hintStep === 0) {
-      hint(); // joue déjà Audio 'hint' et incrémente hintStep en interne
-      if (btnHint) {
-        btnHint.querySelector('.btn__top').textContent = T[lang].btnReveal;
-        btnHint.classList.add('btn--reveal-state');
-      }
-    } else {
-      reveal(); // joue déjà Audio 'reveal' en interne
-      setNextState();
-    }
-  }
-
   /* ── New Pokémon ── */
   async function newPokemon() {
     if (loading) return;
-    loading = true;
-    resetActionButtons();
+    loading  = true;
+    hintStep = 0;
 
     const screen = Dom.get('screen');
     const input  = Dom.get('guess-input');
@@ -659,7 +590,6 @@ const Game = (() => {
       revealPokemon(true);
       Dom.setText('status-text', T[lang].statusCorrect);
       Toast.show(T[lang].toastCorrect);
-      setNextState();
       setTimeout(newPokemon, CONFIG.AUTO_NEXT_DELAY);
     } else {
           score.wrong++;
@@ -748,7 +678,6 @@ const Game = (() => {
 
         if (revealed) {
           revealPokemon(false);
-          setNextState();
         } else {
           resetImgStyle();
           Dom.get('pokemon-img').style.filter = 'brightness(0)';
@@ -763,9 +692,11 @@ const Game = (() => {
     }
 
     /* Écouteurs */
-    Dom.get('btn-guess').addEventListener('click', handleMainAction);
+    Dom.get('btn-guess').addEventListener('click', () => { Audio.play('ui'); check(); });
+    Dom.get('btn-new').addEventListener('click',   () => { Audio.play('newmon'); newPokemon(); });
     Dom.get('btn-lang').addEventListener('click',  toggleLang);
-    Dom.get('btnHint').addEventListener('click',   handleHintAction);
+    Dom.get('btnHint').addEventListener('click',   hint);
+    Dom.get('btnReveal').addEventListener('click', reveal);
     Dom.get('btn-mute')?.addEventListener('click', toggleMute);
     document.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
   }

@@ -33,8 +33,18 @@
         </div>
       </div>
 
-      <!-- Logo -->
-      <img src="wtp-logo.png" class="wtp-logo" alt="Who's That Pokémon" />
+      <!-- Logo + Boutons Langue / Son -->
+      <div class="logo-bar">
+        <img src="wtp-logo.png" class="wtp-logo" alt="Who's That Pokémon" />
+        <div class="logo-controls">
+          <button class="btn btn--lang" id="btn-lang" aria-label="Changer la langue">
+            <span class="btn__top">FR / EN</span>
+          </button>
+          <button class="btn btn--mute" id="btn-mute" aria-label="Couper le son">
+            <span class="btn__top">🔊</span>
+          </button>
+        </div>
+      </div>
 
       <!-- Écran principal -->
       <div class="screen-wrapper">
@@ -90,7 +100,7 @@
 
       <!-- Contrôles -->
       <div class="controls">
-
+      
         <!-- Champ de saisie -->
         <div class="input-group">
           <label class="input-label" id="input-label" for="guess-input">ENTREZ LE NOM</label>
@@ -105,27 +115,17 @@
             />
           </div>
         </div>
-
-        <!-- Ligne : Deviner/Suivant / Langue / Son -->
-        <div class="btn-row">
-          <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse, ou passer au suivant">
-            <span class="btn__top">DEVINER</span>
-          </button>
-          <button class="btn btn--lang" id="btn-lang" aria-label="Changer la langue">
-            <span class="btn__top">FR / EN</span>
-          </button>
-          <button class="btn btn--mute" id="btn-mute" aria-label="Couper le son">
-            <span class="btn__top">🔊</span>
-          </button>
-        </div>
-
-        <!-- Indice → devient Révéler après le premier appui -->
-        <div class="hint-row">
-          <button class="btn btn--hint" aria-label="Obtenir un indice, puis révéler">
-            <span class="btn__top">INDICE</span>
-          </button>
-        </div>
-
+      
+        <!-- Bouton 1 : DEVINER / SUIVANT -->
+        <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse ou passer au suivant">
+          <span class="btn__top">DEVINER</span>
+        </button>
+      
+        <!-- Bouton 2 : INDICE / RÉVÉLER -->
+        <button class="btn btn--hint" id="btn-hint" aria-label="Obtenir un indice ou révéler">
+          <span class="btn__top">INDICE</span>
+        </button>
+      
       </div>
 
       <!-- D-pad décoratif -->

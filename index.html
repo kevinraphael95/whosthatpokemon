@@ -33,18 +33,8 @@
         </div>
       </div>
 
-      <!-- Logo + Boutons Langue / Son -->
-      <div class="logo-bar">
-        <img src="wtp-logo.png" class="wtp-logo" alt="Who's That Pokémon" />
-        <div class="logo-controls">
-          <button class="btn btn--lang" id="btn-lang" aria-label="Changer la langue">
-            <span class="btn__top">FR / EN</span>
-          </button>
-          <button class="btn btn--mute" id="btn-mute" aria-label="Couper le son">
-            <span class="btn__top">🔊</span>
-          </button>
-        </div>
-      </div>
+      <!-- Logo -->
+      <img src="wtp-logo.png" class="wtp-logo" alt="Who's That Pokémon" />
 
       <!-- Écran principal -->
       <div class="screen-wrapper">
@@ -100,7 +90,7 @@
 
       <!-- Contrôles -->
       <div class="controls">
-      
+
         <!-- Champ de saisie -->
         <div class="input-group">
           <label class="input-label" id="input-label" for="guess-input">ENTREZ LE NOM</label>
@@ -115,17 +105,35 @@
             />
           </div>
         </div>
-      
-        <!-- Bouton 1 : DEVINER / SUIVANT -->
-        <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse ou passer au suivant">
-          <span class="btn__top">DEVINER</span>
+
+        <!-- Ligne : Deviner / Langue / Son -->
+        <div class="btn-row">
+          <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse">
+            <span class="btn__top">DEVINER</span>
+          </button>
+          <button class="btn btn--lang" id="btn-lang" aria-label="Changer la langue">
+            <span class="btn__top">FR / EN</span>
+          </button>
+          <button class="btn btn--mute" id="btn-mute" aria-label="Couper le son">
+            <span class="btn__top">🔊</span>
+          </button>
+        </div>
+
+        <!-- Nouveau Pokémon -->
+        <button class="btn btn--new" id="btn-new" aria-label="Charger un nouveau Pokémon">
+          <span class="btn__top">— NOUVEAU POKÉMON —</span>
         </button>
-      
-        <!-- Bouton 2 : INDICE / RÉVÉLER -->
-        <button class="btn btn--hint" id="btn-hint" aria-label="Obtenir un indice ou révéler">
-          <span class="btn__top">INDICE</span>
-        </button>
-      
+
+        <!-- Indice / Révéler -->
+        <div class="hint-row">
+          <button class="btn btn--hint" aria-label="Obtenir un indice">
+            <span class="btn__top">INDICE</span>
+          </button>
+          <button class="btn btn--reveal" aria-label="Révéler le Pokémon">
+            <span class="btn__top">RÉVÉLER</span>
+          </button>
+        </div>
+
       </div>
 
       <!-- D-pad décoratif -->

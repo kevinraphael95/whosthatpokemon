@@ -414,10 +414,10 @@ body::before {
   width          : var(--panel-w);
   background     : linear-gradient(160deg, #c62828 0%, #8d0000 50%, #5a0000 100%);
   border-radius  : 0 var(--radius-xl) var(--radius-xl) 0;
-  padding        : 28px 28px 28px 24px;
+  padding        : 20px 28px 28px 24px;
   display        : flex;
   flex-direction : column;
-  gap            : var(--gap-lg);
+  gap            : var(--gap-md);
   position       : relative;
   box-shadow     :
     inset 0 2px 0 rgba(255, 255, 255, 0.08),
@@ -434,6 +434,40 @@ body::before {
   border-bottom : 3px solid rgba(0, 0, 0, 0.2);
   border-left   : 3px solid rgba(0, 0, 0, 0.2);
 }
+
+
+/* ── Réglages (langue / son) ───────────────────────────────────
+   Volontairement à part et discrets : ce ne sont pas des actions
+   de jeu, ils ne doivent pas rivaliser visuellement avec DEVINER. */
+.settings-row {
+  display          : flex;
+  justify-content  : flex-end;
+  gap              : var(--gap-xs);
+  position         : relative;
+  z-index          : 2;
+}
+.icon-btn {
+  border                     : none;
+  cursor                     : pointer;
+  font-family                : var(--font-pixel);
+  border-radius              : 20px;
+  padding                    : 0;
+  background                 : rgba(0, 0, 0, 0.25);
+  box-shadow                 : 0 2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition                 : transform var(--transition-fast), background var(--transition-base);
+  user-select                : none;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn .btn__top {
+  display        : block;
+  padding        : 7px 12px;
+  font-size      : 8px;
+  letter-spacing : 1px;
+  color          : rgba(255, 255, 255, 0.75);
+}
+.icon-btn:hover  { background: rgba(0, 0, 0, 0.4); }
+.icon-btn:active { transform: translateY(1px); }
+.icon-btn.btn--muted .btn__top { color: rgba(255, 255, 255, 0.35); }
 
 
 /* ── Mini écran ────────────────────────────────────────────── */
@@ -611,55 +645,61 @@ body::before {
   transition    : background var(--transition-fast);
 }
 
-/* ── Grilles de boutons ────────────────────────────────────── */
-.btn-row {
-  display               : grid;
-  grid-template-columns : 1fr auto auto;
-  gap                   : var(--gap-sm);
-  align-items           : stretch;
+/* Action primaire : pleine largeur, bien visible */
+.btn--guess {
+  width           : 100%;
+  background      : #1a3a00;
+  box-shadow      : 0 var(--btn-shadow-height) 0 #0a1a00;
 }
-.btn-row .btn         { display: flex; flex-direction: column; }
-.btn-row .btn .btn__top {
-  flex            : 1;
-  display         : flex;
-  align-items     : center;
-  justify-content : center;
+.btn--guess .btn__top {
+  background      : linear-gradient(180deg, #69f0ae, #43a047);
+  color           : #0a1a00;
+  padding         : 15px 14px;
+  font-size       : calc(var(--font-btn) + 1px);
+  text-align      : center;
 }
+.btn--guess:hover .btn__top { background: linear-gradient(180deg, #76ff99, #4caf50); }
+
+/* Actions secondaires : côte à côte, même poids visuel entre elles,
+   plus discrètes que l'action primaire */
 .hint-row {
   display               : grid;
   grid-template-columns : 1fr 1fr;
   gap                   : var(--gap-sm);
 }
+.hint-row .btn        { display: flex; flex-direction: column; }
+.hint-row .btn .btn__top {
+  flex            : 1;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+  text-align      : center;
+}
 
-/* ── Variantes de boutons ──────────────────────────────────── */
-
-/* Vert — Deviner */
-.btn--guess        { background: #1a3a00; box-shadow: 0 var(--btn-shadow-height) 0 #0a1a00; }
-.btn--guess .btn__top { background: linear-gradient(180deg, #69f0ae, #43a047); color: #0a1a00; }
-.btn--guess:hover .btn__top { background: linear-gradient(180deg, #76ff99, #4caf50); }
-
-/* Bleu — Langue */
-.btn--lang          { background: #00214a; box-shadow: 0 var(--btn-shadow-height) 0 #000d24; min-width: 60px; }
-.btn--lang .btn__top { background: linear-gradient(180deg, #4fc3f7, #0288d1); color: #001433; font-size: 9px; padding: 11px 8px; }
-
-/* Rouge — Nouveau */
-.btn--new          { background: #1a0000; box-shadow: 0 var(--btn-shadow-height) 0 #080000; }
-.btn--new .btn__top { background: linear-gradient(180deg, #ff6659, #e53935); color: #1a0000; font-size: var(--font-btn); text-align: center; }
-.btn--new:hover .btn__top { background: linear-gradient(180deg, #ff7961, #f44336); }
-
-/* Jaune — Indice */
 .btn--hint          { background: #2a2000; box-shadow: 0 var(--btn-shadow-height) 0 #100d00; }
-.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; font-size: var(--font-btn); text-align: center; }
+.btn--hint .btn__top { background: linear-gradient(180deg, #ffd54f, #f9a825); color: #1a1000; }
 
-/* Violet — Révéler */
 .btn--reveal          { background: #1a0030; box-shadow: 0 var(--btn-shadow-height) 0 #090015; }
-.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; font-size: var(--font-btn); text-align: center; }
+.btn--reveal .btn__top { background: linear-gradient(180deg, #ce93d8, #8e24aa); color: #1a0030; }
 
-/* Gris — Mute */
-.btn--mute           { background: #1a1a1a; box-shadow: 0 var(--btn-shadow-height) 0 #080808; min-width: 44px; }
-.btn--mute .btn__top  { background: linear-gradient(180deg, #555, #333); color: #fff; font-size: 14px; padding: 9px 8px; text-align: center; }
-.btn--mute:hover .btn__top { background: linear-gradient(180deg, #666, #444); }
-.btn--muted .btn__top { background: linear-gradient(180deg, #333, #1a1a1a); color: #666; }
+/* Action tertiaire : "passer", volontairement en retrait (contour,
+   pas de remplissage) pour ne pas concurrencer Deviner */
+.btn--new {
+  width         : 100%;
+  background    : transparent;
+  box-shadow    : none;
+  border        : 2px solid rgba(255, 255, 255, 0.25);
+}
+.btn--new .btn__top {
+  background      : transparent;
+  color           : rgba(255, 255, 255, 0.6);
+  padding         : 11px 14px;
+  font-size       : calc(var(--font-btn) - 1px);
+  text-align      : center;
+}
+.btn--new:hover        { border-color: rgba(255, 255, 255, 0.45); }
+.btn--new:hover .btn__top { color: rgba(255, 255, 255, 0.85); }
+.btn--new:active { transform: translateY(1px); }
 
 
 /* ── D-pad ─────────────────────────────────────────────────── */
@@ -879,8 +919,8 @@ body::before {
     width          : 100%;
     border-radius  : 0;
     border         : none;
-    padding        : 12px 16px 20px;
-    gap            : var(--gap-md);
+    padding        : 10px 16px 20px;
+    gap            : var(--gap-sm);
     box-shadow     : none;
     background     : linear-gradient(180deg, #b71c1c 0%, #7f0000 100%);
     flex           : 1;
@@ -905,10 +945,10 @@ body::before {
 
   .controls    { gap: var(--gap-sm); }
   .btn__top    { padding: 13px 10px; font-size: 9px; }
-  .btn--lang .btn__top { font-size: 9px; padding: 13px 8px; }
-  .btn--new .btn__top  { font-size: 9px; }
-  .btn-row     { gap: 7px; }
+  .btn--guess .btn__top { font-size: 10px; }
+  .btn--new .btn__top   { font-size: 9px; }
   .hint-row    { gap: 7px; }
+  .icon-btn .btn__top { padding: 8px 12px; font-size: 8px; }
 
   .dpad-area   { display: none; }
 

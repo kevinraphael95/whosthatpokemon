@@ -2,7 +2,7 @@
 
 Un mini-jeu web rétro interactif inspiré de la séquence culte de la série animée Pokémon, conçu sous la forme d'un Pokédex.
 
-🎮 **[Tester le jeu en ligne](https://www.google.com/search?q=https://kevinraphael95.github.io/whosthatpokemon/)**
+🎮 **[Tester le jeu en ligne](https://kevinraphael95.github.io/whosthatpokemon/)**
 
 ---
 

@@ -16,7 +16,7 @@ Un mini-jeu web rétro interactif inspiré de la séquence culte de la série an
 * **Révéler** : Dévoile immédiatement l'artwork et le nom du Pokémon.
 
 
-* **Design Pokédex Rétro & Responsive** : Interface soignée intégrant des effets scanlines, CRT et animations CSS, adaptée aussi bien aux écrans PC qu'aux mobiles[cite: 2, 4].
+* **Design Pokédex Rétro & Responsive** : Interface soignée intégrant des effets scanlines, CRT et animations CSS, adaptée aussi bien aux écrans PC qu'aux mobiles.
 * **Effets sonores générés & Audio Web** : Effets UI et victoires générés dynamiquement avec l'API Web Audio.
 * **Sauvegarde automatique** : Ton niveau, ton XP, ton score et la session en cours sont enregistrés dans le `localStorage`.
 
@@ -66,6 +66,6 @@ Ouvre simplement le fichier `index.html` dans ton navigateur Web préféré.
 ## 🎮 Comment jouer ?
 
 1. Une silhouette de Pokémon s'affiche sur l'écran du Pokédex.
-2. Saisis le nom du Pokémon dans le champ texte (en français ou en anglais) et valide avec la touche **Entrée** ou le bouton **Deviner**[cite: 1, 2].
+2. Saisis le nom du Pokémon dans le champ texte (en français ou en anglais) et valide avec la touche **Entrée** ou le bouton **Deviner**.
 3. Si la réponse est correcte, la silhouette se révèle, tu gagnes de l'XP et un nouveau Pokémon est chargé automatiquement.
-4. En cas de doute, utilise les boutons **Indice** ou **Révéler**[cite: 1, 2].
+4. En cas de doute, utilise les boutons **Indice** ou **Révéler**.

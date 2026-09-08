@@ -8,27 +8,27 @@ Un mini-jeu web rétro interactif inspiré de la séquence culte de la série an
 
 ## 🌟 Fonctionnalités
 
-* **Génération aléatoire** : Couvre jusqu'à 1 025 Pokémon via l'API officielle PokéAPI[cite: 1].
-* **Système de progression (XP & Levels)** : Gagne de l'expérience à chaque bonne réponse et monte de niveau avec des effets audio et pop-ups dédiés[cite: 1].
-* **Multilingue (FR / EN)** : Bascule à tout moment entre les noms de Pokémon en français et en anglais[cite: 1].
+* **Génération aléatoire** : Couvre jusqu'à 1 025 Pokémon via l'API officielle PokéAPI.
+* **Système de progression (XP & Levels)** : Gagne de l'expérience à chaque bonne réponse et monte de niveau avec des effets audio et pop-ups dédiés.
+* **Multilingue (FR / EN)** : Bascule à tout moment entre les noms de Pokémon en français et en anglais.
 * **Aides de jeu** :
-* **Indice** : Affiche progressivement les premières lettres du nom[cite: 1].
-* **Révéler** : Dévoile immédiatement l'artwork et le nom du Pokémon[cite: 1].
+* **Indice** : Affiche progressivement les premières lettres du nom.
+* **Révéler** : Dévoile immédiatement l'artwork et le nom du Pokémon.
 
 
 * **Design Pokédex Rétro & Responsive** : Interface soignée intégrant des effets scanlines, CRT et animations CSS, adaptée aussi bien aux écrans PC qu'aux mobiles[cite: 2, 4].
-* **Effets sonores générés & Audio Web** : Effets UI et victoires générés dynamiquement avec l'API Web Audio[cite: 1].
-* **Sauvegarde automatique** : Ton niveau, ton XP, ton score et la session en cours sont enregistrés dans le `localStorage`[cite: 1].
+* **Effets sonores générés & Audio Web** : Effets UI et victoires générés dynamiquement avec l'API Web Audio.
+* **Sauvegarde automatique** : Ton niveau, ton XP, ton score et la session en cours sont enregistrés dans le `localStorage`.
 
 ---
 
 ## 🛠️ Technologies utilisées
 
-* **HTML5** : Structure sémantique du Pokédex[cite: 2].
-* **CSS3** : Design responsive sans framework (Flexbox, Grid, CSS Variables, Animations)[cite: 4].
-* **JavaScript (ES6+)** : Architecture modulaire Vanilla JS sans dépendance externe[cite: 1].
-* **[PokéAPI](https://pokeapi.co/)** : Récupération des données et des artworks officiels HD[cite: 1].
-* **Web Audio API** : Synthèse sonore interne pour les effets rétro[cite: 1].
+* **HTML5** : Structure sémantique du Pokédex.
+* **CSS3** : Design responsive sans framework (Flexbox, Grid, CSS Variables, Animations)].
+* **JavaScript (ES6+)** : Architecture modulaire Vanilla JS sans dépendance externe.
+* **[PokéAPI](https://pokeapi.co/)** : Récupération des données et des artworks officiels HD.
+* **Web Audio API** : Synthèse sonore interne pour les effets rétro.
 
 ---
 
@@ -65,7 +65,7 @@ Ouvre simplement le fichier `index.html` dans ton navigateur Web préféré.
 
 ## 🎮 Comment jouer ?
 
-1. Une silhouette de Pokémon s'affiche sur l'écran du Pokédex[cite: 2].
+1. Une silhouette de Pokémon s'affiche sur l'écran du Pokédex.
 2. Saisis le nom du Pokémon dans le champ texte (en français ou en anglais) et valide avec la touche **Entrée** ou le bouton **Deviner**[cite: 1, 2].
-3. Si la réponse est correcte, la silhouette se révèle, tu gagnes de l'XP et un nouveau Pokémon est chargé automatiquement[cite: 1].
+3. Si la réponse est correcte, la silhouette se révèle, tu gagnes de l'XP et un nouveau Pokémon est chargé automatiquement.
 4. En cas de doute, utilise les boutons **Indice** ou **Révéler**[cite: 1, 2].

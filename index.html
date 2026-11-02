@@ -6,155 +6,89 @@
   <title>WHO'S THAT POKÉMON</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<main class="dex">
 
-  <!-- Overlays décoratifs -->
-  <div class="scanline" aria-hidden="true"></div>
-  <div class="noise"    aria-hidden="true"></div>
-
-  <main class="pokedex" role="main">
-
-    <!-- ── PANNEAU GAUCHE ───────────────────────────── -->
-    <section class="pokedex__left" aria-label="Écran principal">
-
-      <!-- Lentille + dots -->
-      <div class="pokedex__lens-group" aria-hidden="true">
-        <div class="lens">
-          <div class="lens__inner"></div>
-          <div class="lens__glare"></div>
-        </div>
-        <div class="lens-dots">
-          <div class="dot dot--red"></div>
-          <div class="dot dot--yellow"></div>
-          <div class="dot dot--green"></div>
-        </div>
-      </div>
-
-      <!-- Logo -->
-      <img src="wtp-logo.png" class="wtp-logo" alt="Who's That Pokémon" />
-
-      <!-- Écran principal -->
-      <div class="screen-wrapper">
-        <div class="screen-label" id="screen-label" aria-hidden="true">DISPLAY / AFFICHAGE</div>
-
-        <div class="screen" id="screen" role="img" aria-label="Silhouette du Pokémon">
-          <div class="screen__grid"   aria-hidden="true"></div>
-          <div class="screen__corner tl" aria-hidden="true"></div>
-          <div class="screen__corner tr" aria-hidden="true"></div>
-          <div class="screen__corner bl" aria-hidden="true"></div>
-          <div class="screen__corner br" aria-hidden="true"></div>
-
-          <div class="silhouette-wrap">
-            <img id="pokemon-img" src="" alt="Silhouette du Pokémon" />
-          </div>
-
-          <div class="screen__overlay" id="screen-overlay" aria-hidden="true">
-            <span class="screen__prompt" id="screen-prompt">?</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Haut-parleur décoratif -->
-      <div class="speaker" aria-hidden="true">
-        <div class="speaker__lines">
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ── CHARNIÈRE ────────────────────────────────── -->
-    <div class="hinge" aria-hidden="true">
-      <div class="hinge__screw"></div>
-      <div class="hinge__screw"></div>
+  <!-- Gauche : image + résultat -->
+  <section class="left" aria-label="Image à deviner">
+    <div class="top" aria-hidden="true">
+      <div class="lens"></div>
+      <div class="dots"><i></i><i></i><i></i></div>
+      <img src="wtp-logo.png" class="logo" alt="" />
     </div>
 
-    <!-- ── PANNEAU DROIT ─────────────────────────────── -->
-    <section class="pokedex__right" aria-label="Contrôles">
+    <div class="screen" id="screen">
+      <span class="qmark" aria-hidden="true">?</span>
+      <img id="pokemon-img" alt="Silhouette d'un Pokémon à deviner" />
+    </div>
 
-      <!-- Réglages : langue et son, séparés des actions de jeu -->
-      <div class="settings-row" role="group" aria-label="Réglages">
-        <button class="icon-btn" id="btn-lang" aria-label="Changer la langue">
-          <span class="btn__top">FR/EN</span>
-        </button>
-        <button class="icon-btn" id="btn-mute" aria-label="Couper le son">
-          <span class="btn__top">🔊</span>
-        </button>
+    <div class="banner info" id="banner" role="status" aria-live="polite">
+      <span class="ic" id="banner-icon" aria-hidden="true">❔</span>
+      <span id="banner-text"></span>
+    </div>
+  </section>
+
+  <div class="hinge" aria-hidden="true"></div>
+
+  <!-- Droite : jouer -->
+  <section class="right" aria-label="Jouer">
+
+    <div class="settings" role="group" aria-label="Réglages">
+      <div class="seg" role="group" aria-label="Langue">
+        <button id="lang-fr" aria-pressed="true">Français</button>
+        <button id="lang-en" aria-pressed="false">English</button>
       </div>
+      <button class="sound" id="btn-mute" aria-pressed="true"></button>
+    </div>
 
-      <!-- Mini écran info -->
-      <div class="mini-screen" id="mini-screen" aria-live="polite">
-        <div class="mini-screen__status" id="status-text"></div>
-        <div class="mini-screen__name"   id="pokemon-name"></div>
-        <div class="xp-bar" aria-hidden="true">
-          <div class="xp-bar__fill" id="xp-bar-fill"></div>
-        </div>
-        <div class="mini-screen__bottom-row">
-          <div class="mini-screen__level" id="level-display">LVL 1  ·  0/50 XP</div>
-          <div class="mini-screen__score"><span id="score-display">✓ 0 &nbsp;✗ 0</span></div>
-        </div>
-      </div>
-
-      <!-- Contrôles -->
-      <div class="controls">
-
-        <!-- Champ de saisie -->
-        <div class="input-group">
-          <label class="input-label" id="input-label" for="guess-input">ENTREZ LE NOM</label>
-          <div class="input-wrap">
-            <input
-              type="text"
-              id="guess-input"
-              autocomplete="off"
-              spellcheck="false"
-              inputmode="text"
-              aria-label="Nom du Pokémon"
-            />
-          </div>
-        </div>
-
-        <!-- Action primaire -->
-        <button class="btn btn--guess" id="btn-guess" aria-label="Valider la réponse">
-          <span class="btn__top">DEVINER</span>
-        </button>
-
-        <!-- Actions secondaires : aide à la réponse -->
-        <div class="hint-row">
-          <button class="btn btn--hint" aria-label="Obtenir un indice">
-            <span class="btn__top">INDICE</span>
-          </button>
-          <button class="btn btn--reveal" aria-label="Révéler le Pokémon">
-            <span class="btn__top">RÉVÉLER</span>
-          </button>
-        </div>
-
-        <!-- Action tertiaire : passer, discrète -->
-        <button class="btn btn--new" id="btn-new" aria-label="Charger un nouveau Pokémon">
-          <span class="btn__top">NOUVEAU POKÉMON</span>
-        </button>
-
-      </div>
-
-      <!-- D-pad décoratif -->
-      <div class="dpad-area" aria-hidden="true">
-        <div class="dpad">
-          <div class="dpad__h"></div>
-          <div class="dpad__v"></div>
-          <div class="dpad__center"></div>
-        </div>
-        <div class="dpad-buttons">
-          <button class="circle-btn" id="circle-a" tabindex="-1">A</button>
-          <button class="circle-btn" id="circle-b" tabindex="-1">B</button>
+    <!-- Petit écran : niveau, stats, nom -->
+    <div class="lcd">
+      <div class="lcd-name hidden" id="lcd-name" aria-hidden="true">_ _ _</div>
+      <div class="lcd-row">
+        <span class="lvl" id="level-display"></span>
+        <div class="stats">
+          <span><span data-t="lblOk"></span><b id="ok-n">0</b></span>
+          <span><span data-t="lblKo"></span><b id="ko-n">0</b></span>
+          <span><span data-t="lblStreak"></span><b id="streak-n">0</b></span>
         </div>
       </div>
+      <div class="xp" id="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0"><div id="xp-fill"></div></div>
+      <div class="xp-label" id="xp-label"></div>
+    </div>
 
-    </section>
+    <div>
+      <label class="lab" for="guess-input" data-t="lab"></label>
+      <div class="field">
+        <input id="guess-input" type="text" autocomplete="off" spellcheck="false"
+               role="combobox" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list" />
+        <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+      </div>
+    </div>
 
-  </main>
+    <button class="btn primary" id="btn-guess" data-t="guess"></button>
 
-  <script src="game.js"></script>
+    <div class="row">
+      <button class="btn sec" id="btn-hint"><span data-t="hint"></span><small id="hint-cost"></small></button>
+      <button class="btn sec" id="btn-reveal"><span data-t="reveal"></span><small data-t="revealSub"></small></button>
+      <button class="btn sec" id="btn-skip"><span id="skip-label"></span><small id="skip-sub"></small></button>
+    </div>
+
+    <p class="keys" data-t="keys"></p>
+  </section>
+</main>
+
+<!-- Popup niveau supérieur -->
+<div class="levelup" id="levelup" role="dialog" aria-modal="true" aria-labelledby="levelup-title">
+  <div class="levelup__box">
+    <div class="levelup__title" id="levelup-title"></div>
+    <div class="levelup__sub" id="levelup-sub"></div>
+    <button class="levelup__ok" id="levelup-ok">OK</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
 </body>
 </html>

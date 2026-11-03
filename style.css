@@ -114,14 +114,8 @@ button, input { font: inherit; }
 .screen.flash { animation: flash .6s ease; }
 .qmark { position: absolute; z-index: 3; top: 14px; right: 18px; font-family: var(--pixel); font-size: 1.4rem; color: var(--lcd-ink); opacity: .5; }
 .screen.revealed .qmark { display: none; }
-.screen.loading::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 30%; z-index: 3; pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(155, 188, 15, .35), transparent);
-  animation: scanLoad 1.2s linear infinite;
-}
 @keyframes popIn { 0% { transform: scale(.6) rotate(-4deg); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: none; opacity: 1; } }
 @keyframes flash { 30% { background: #c4ee3a; } }
-@keyframes scanLoad { from { transform: translateY(-100%); } to { transform: translateY(340%); } }
 
 /* ── Bannière de feedback (icône + texte, pas que la couleur) ── */
 .banner { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; border-radius: 14px; background: rgba(0, 0, 0, .35); border: 2px solid rgba(255, 255, 255, .25); font-size: 1.25rem; font-weight: 700; }

@@ -169,7 +169,9 @@ button, input { font: inherit; }
 #guess-input::placeholder { color: #a9b39a; font-weight: 500; }
 #guess-input:focus { border-color: #cfee5a; outline: none; box-shadow: 0 0 0 3px rgba(207, 238, 90, .35), inset 0 0 10px rgba(0, 0, 0, .5); }
 #guess-input:disabled { opacity: .6; }
-#guess-input.shake { animation: shake .4s; border-color: #ff6b61; }
+#guess-input.shake { animation: shake .4s; }
+#guess-input.wrong,
+#guess-input.wrong:focus { border-color: #ff6b61; box-shadow: 0 0 0 3px rgba(255, 107, 97, .4), inset 0 0 10px rgba(0, 0, 0, .5); }
 @keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
 .sugg { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 5; background: #fff; color: #1a1a1a; border-radius: 10px; box-shadow: 0 10px 24px rgba(0, 0, 0, .45); overflow: hidden; list-style: none; }
 .sugg[hidden] { display: none; }

@@ -362,6 +362,7 @@ const Game = (() => {
     screen.classList.add('loading');
     $('lcd-name').classList.remove('correct');
     $('guess-input').value = '';
+    $('guess-input').classList.remove('shake', 'wrong');
     closeSugg();
     setPlayable(false);
     $('btn-skip').disabled = true;
@@ -412,7 +413,7 @@ const Game = (() => {
       ko++; streak = 0;
       Sfx.play('wrong');
       banner('ko', '✖', 'bad');
-      input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+      input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake', 'wrong');
       input.select();
       renderStats(); persist();
     }
@@ -473,7 +474,7 @@ const Game = (() => {
     $('levelup-ok').addEventListener('click', hideLevelUp);
 
     const input = $('guess-input');
-    input.addEventListener('input', openSugg);
+    input.addEventListener('input', () => { input.classList.remove('wrong'); openSugg(); });
     $('sugg').addEventListener('mousedown', (e) => {
       const li = e.target.closest('li');
       if (li) { e.preventDefault(); pick(+li.dataset.i); }

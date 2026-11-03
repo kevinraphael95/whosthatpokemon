@@ -10,17 +10,30 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+<!-- Overlays décoratifs -->
+<div class="scanline" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
 <main class="dex">
 
   <!-- Gauche : image + résultat -->
   <section class="left" aria-label="Image à deviner">
     <div class="top" aria-hidden="true">
-      <div class="lens"></div>
+      <div class="lens">
+        <div class="lens__inner"></div>
+        <div class="lens__glare"></div>
+      </div>
       <div class="dots"><i></i><i></i><i></i></div>
       <img src="wtp-logo.png" class="logo" alt="" />
     </div>
 
     <div class="screen" id="screen">
+      <div class="screen__grid" aria-hidden="true"></div>
+      <span class="corner tl" aria-hidden="true"></span>
+      <span class="corner tr" aria-hidden="true"></span>
+      <span class="corner bl" aria-hidden="true"></span>
+      <span class="corner br" aria-hidden="true"></span>
       <span class="qmark" aria-hidden="true">?</span>
       <img id="pokemon-img" alt="Silhouette d'un Pokémon à deviner" />
     </div>
@@ -29,9 +42,16 @@
       <span class="ic" id="banner-icon" aria-hidden="true">❔</span>
       <span id="banner-text"></span>
     </div>
+
+    <div class="speaker" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
   </section>
 
-  <div class="hinge" aria-hidden="true"></div>
+  <div class="hinge" aria-hidden="true">
+    <div class="screw"></div>
+    <div class="screw"></div>
+  </div>
 
   <!-- Droite : jouer -->
   <section class="right" aria-label="Jouer">
@@ -44,7 +64,7 @@
       <button class="sound" id="btn-mute" aria-pressed="true"></button>
     </div>
 
-    <!-- Petit écran : niveau, stats, nom -->
+    <!-- Petit écran : nom, niveau, stats -->
     <div class="lcd">
       <div class="lcd-name hidden" id="lcd-name" aria-hidden="true">_ _ _</div>
       <div class="lcd-row">
@@ -73,10 +93,23 @@
     <div class="row">
       <button class="btn sec" id="btn-hint"><span data-t="hint"></span><small id="hint-cost"></small></button>
       <button class="btn sec" id="btn-reveal"><span data-t="reveal"></span><small data-t="revealSub"></small></button>
-      <button class="btn sec" id="btn-skip"><span id="skip-label"></span><small id="skip-sub"></small></button>
+      <button class="btn sec skip" id="btn-skip"><span id="skip-label"></span><small id="skip-sub"></small></button>
     </div>
 
     <p class="keys" data-t="keys"></p>
+
+    <!-- Croix directionnelle décorative -->
+    <div class="dpad-area" aria-hidden="true">
+      <div class="dpad">
+        <div class="dpad__h"></div>
+        <div class="dpad__v"></div>
+        <div class="dpad__center"></div>
+      </div>
+      <div class="dpad-buttons">
+        <span class="circle-btn a">A</span>
+        <span class="circle-btn b">B</span>
+      </div>
+    </div>
   </section>
 </main>
 

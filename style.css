@@ -165,6 +165,7 @@ button, input { font: inherit; }
 /* ── Saisie + suggestions ── */
 .lab { display: block; font-size: 1.05rem; margin-bottom: 6px; }
 .field { position: relative; }
+.right > .input-group { z-index: 10; } /* sinon les suggestions passent sous les boutons */
 #guess-input { width: 100%; padding: 14px 16px; font-size: 1.35rem; font-weight: 700; color: #e9ffb0; background: #0d0d0d; border: 3px solid #555; border-radius: 10px; letter-spacing: .5px; }
 #guess-input::placeholder { color: #a9b39a; font-weight: 500; }
 #guess-input:focus { border-color: #cfee5a; outline: none; box-shadow: 0 0 0 3px rgba(207, 238, 90, .35), inset 0 0 10px rgba(0, 0, 0, .5); }

@@ -475,6 +475,8 @@ const Game = (() => {
 
     const input = $('guess-input');
     input.addEventListener('input', () => { input.classList.remove('wrong'); openSugg(); });
+    input.addEventListener('blur', closeSugg);
+    input.addEventListener('focus', () => { if (input.value) openSugg(); });
     $('sugg').addEventListener('mousedown', (e) => {
       const li = e.target.closest('li');
       if (li) { e.preventDefault(); pick(+li.dataset.i); }

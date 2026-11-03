@@ -1,5 +1,5 @@
 /* ============================================================
-   WHO'S THAT POKÉMON — game.js (v2)
+   WHO'S THAT POKÉMON — game.js (v3)
    ============================================================ */
 
 /* ── CONFIG ─────────────────────────────────────────────────── */
@@ -17,6 +17,12 @@ const CONFIG = {
   GRAPHQL: 'https://beta.pokeapi.co/graphql/v1beta',
 };
 
+/* ── DRAPEAUX (SVG : les emojis drapeaux ne s'affichent pas sous Windows) ── */
+const FLAGS = {
+  fr: '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#0055a4"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ef4135"/></svg>',
+  en: '<svg viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#c8102e" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13"/><path d="M30 0v40M0 20h60" stroke="#c8102e" stroke-width="8"/></svg>',
+};
+
 /* ── TEXTES ─────────────────────────────────────────────────── */
 const T = {
   fr: {
@@ -25,7 +31,8 @@ const T = {
     skip: '⏭ Passer', skipSub: 'sans pénalité', next: '▶ Suivant', nextSub: 'nouveau Pokémon',
     hintSteps: ['1ʳᵉ lettre', '3 premières lettres', '5 premières lettres'],
     lblOk: 'Trouvés', lblKo: 'Ratés', lblStreak: 'Série',
-    soundOn: '🔊 Son activé', soundOff: '🔇 Son coupé',
+    langLabel: 'Langue : français. Passer en anglais',
+    soundOn: 'Son activé. Couper le son', soundOff: 'Son coupé. Activer le son',
     good: 'Bravo !', bad: 'Raté, essaie encore.', done: 'Voici la réponse. Clique sur « Suivant ».',
     empty: 'Écris un nom avant de valider.', hintTxt: 'Indice :', err: 'Erreur de chargement. Clique sur « Suivant ».',
     keys: '<kbd>Entrée</kbd> valider · <kbd>Tab</kbd> indice · <kbd>Échap</kbd> passer',
@@ -39,7 +46,8 @@ const T = {
     skip: '⏭ Skip', skipSub: 'no penalty', next: '▶ Next', nextSub: 'new Pokémon',
     hintSteps: ['1st letter', 'First 3 letters', 'First 5 letters'],
     lblOk: 'Found', lblKo: 'Missed', lblStreak: 'Streak',
-    soundOn: '🔊 Sound on', soundOff: '🔇 Sound off',
+    langLabel: 'Language: English. Switch to French',
+    soundOn: 'Sound on. Mute', soundOff: 'Sound off. Turn on',
     good: 'Well done!', bad: 'Not quite, try again.', done: 'Here is the answer. Press “Next”.',
     empty: 'Type a name first.', hintTxt: 'Hint:', err: 'Loading error. Press “Next”.',
     keys: '<kbd>Enter</kbd> submit · <kbd>Tab</kbd> hint · <kbd>Esc</kbd> skip',
@@ -218,9 +226,12 @@ const Game = (() => {
   }
 
   /* ── Affichage ── */
+  /* « idle » = message d'attente (« Qui est ce Pokémon ? ») : le CSS le masque sur mobile */
   function banner(kind, icon, key, extra = '') {
     bannerState = [kind, icon, key, extra];
-    $('banner').className = `banner ${kind}`;
+    const b = $('banner');
+    b.className = `banner ${kind}`;
+    b.classList.toggle('idle', key === 'ask');
     $('banner-icon').textContent = icon;
     $('banner-text').textContent = (t()[key] ?? key) + extra;
   }
@@ -253,15 +264,27 @@ const Game = (() => {
     b.classList.toggle('go', revealed);
   }
 
+  /* Réglages : drapeau = langue actuelle, icône = état du son */
+  function renderSettings() {
+    const lb = $('btn-lang');
+    lb.innerHTML = FLAGS[lang];
+    lb.setAttribute('aria-label', t().langLabel);
+    lb.title = t().langLabel;
+
+    const mb = $('btn-mute'), muted = Sfx.isMuted();
+    mb.firstElementChild.textContent = muted ? '🔇' : '🔊';
+    mb.classList.toggle('off', muted);
+    mb.setAttribute('aria-pressed', !muted);
+    mb.setAttribute('aria-label', muted ? t().soundOff : t().soundOn);
+    mb.title = muted ? t().soundOff : t().soundOn;
+  }
+
   function renderTexts() {
     document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = t()[el.dataset.t]; });
     $('guess-input').placeholder = t().ph;
     $('hint-cost').textContent = hintStep >= CONFIG.HINT_STEPS.length ? '—' : t().hintSteps[hintStep];
-    $('btn-mute').textContent = Sfx.isMuted() ? t().soundOff : t().soundOn;
-    $('btn-mute').setAttribute('aria-pressed', !Sfx.isMuted());
-    $('lang-fr').setAttribute('aria-pressed', lang === 'fr');
-    $('lang-en').setAttribute('aria-pressed', lang === 'en');
     document.documentElement.lang = lang;
+    renderSettings();
     banner(...bannerState);
     renderStats(); renderSkip(); renderName();
   }
@@ -419,9 +442,9 @@ const Game = (() => {
     newPokemon();
   }
 
-  function toggleLang(l) {
-    if (l === lang) return;
-    lang = l;
+  /* Un seul bouton : le drapeau affiché est la langue actuelle, un clic bascule */
+  function toggleLang() {
+    lang = lang === 'fr' ? 'en' : 'fr';
     Sfx.play('ui');
     closeSugg();
     renderTexts();
@@ -429,7 +452,7 @@ const Game = (() => {
 
   function toggleMute() {
     Sfx.setMuted(!Sfx.isMuted());
-    renderTexts();
+    renderSettings();
     persist();
   }
 
@@ -445,8 +468,7 @@ const Game = (() => {
     $('btn-hint').addEventListener('click', hint);
     $('btn-reveal').addEventListener('click', reveal);
     $('btn-skip').addEventListener('click', skipOrNext);
-    $('lang-fr').addEventListener('click', () => toggleLang('fr'));
-    $('lang-en').addEventListener('click', () => toggleLang('en'));
+    $('btn-lang').addEventListener('click', toggleLang);
     $('btn-mute').addEventListener('click', toggleMute);
     $('levelup-ok').addEventListener('click', hideLevelUp);
 

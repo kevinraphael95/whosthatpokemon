@@ -10,11 +10,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<!-- Overlays décoratifs -->
-<div class="scanline" aria-hidden="true"></div>
-<div class="noise" aria-hidden="true"></div>
-
 <main class="dex">
 
   <!-- Gauche : image + résultat -->
@@ -38,7 +33,7 @@
       <img id="pokemon-img" alt="Silhouette d'un Pokémon à deviner" />
     </div>
 
-    <div class="banner info" id="banner" role="status" aria-live="polite">
+    <div class="banner info idle" id="banner" role="status" aria-live="polite">
       <span class="ic" id="banner-icon" aria-hidden="true">❔</span>
       <span id="banner-text"></span>
     </div>
@@ -56,12 +51,10 @@
   <!-- Droite : jouer -->
   <section class="right" aria-label="Jouer">
 
+    <!-- Réglages : drapeau de la langue actuelle + son -->
     <div class="settings" role="group" aria-label="Réglages">
-      <div class="seg" role="group" aria-label="Langue">
-        <button id="lang-fr" aria-pressed="true">Français</button>
-        <button id="lang-en" aria-pressed="false">English</button>
-      </div>
-      <button class="sound" id="btn-mute" aria-pressed="true"></button>
+      <button class="icon-btn" id="btn-lang" type="button"></button>
+      <button class="icon-btn" id="btn-mute" type="button" aria-pressed="true"><span class="snd">🔊</span></button>
     </div>
 
     <!-- Petit écran : nom, niveau, stats -->

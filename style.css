@@ -163,7 +163,7 @@ button, input { font: inherit; }
 .xp-label { font-size: .95rem; }
 
 /* ── Saisie + suggestions ── */
-.lab { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+.lab { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* masqué visuellement, lu par les lecteurs d'écran */
 .field { position: relative; }
 .right > .input-group { z-index: 10; } /* sinon les suggestions passent sous les boutons */
 #guess-input { width: 100%; padding: 14px 16px; font-size: 1.35rem; font-weight: 700; color: #e9ffb0; background: #0d0d0d; border: 3px solid #555; border-radius: 10px; letter-spacing: .5px; }

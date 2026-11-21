@@ -1,5 +1,5 @@
 /* ============================================================
-   WHO'S THAT POKÉMON — style.css (v4)
+   WHO'S THAT POKÉMON — style.css
    Scanlines uniquement sur les écrans · réglages en boutons ronds
    · mobile réorganisé
    ============================================================ */
@@ -109,12 +109,15 @@ button, input { font: inherit; }
   filter: brightness(0) drop-shadow(0 0 18px rgba(255, 255, 255, .35));
   transition: filter .4s, opacity .25s;
 }
-.screen.loading img { opacity: 0; animation: none; }   /* fondu sortant, même si le Pokémon est révélé */
+.screen.loading img { opacity: 0; }
+.screen.revealed.loading img { animation: fadeOut .25s ease both; }   /* même fondu sortant quand le Pokémon est révélé */
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 .screen.snap img { transition: none; }                    /* changement d'état instantané pendant que l'image est cachée */
 .screen.revealed img { filter: none; animation: popIn .55s var(--bounce) both; }
 .screen.flash { animation: flash .6s ease; }
 .qmark { position: absolute; z-index: 3; top: 14px; right: 18px; font-family: var(--pixel); font-size: 1.4rem; color: var(--lcd-ink); opacity: .5; }
-.screen.revealed .qmark { display: none; }
+.qmark { transition: opacity .25s; }
+.screen.revealed .qmark { opacity: 0; }   /* fondu au lieu de display:none : plus de « ? » qui surgit d'un coup */
 @keyframes popIn { 0% { transform: scale(.6) rotate(-4deg); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: none; opacity: 1; } }
 @keyframes flash { 30% { background: #c4ee3a; } }
 

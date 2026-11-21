@@ -1,5 +1,5 @@
 /* ============================================================
-   WHO'S THAT POKÉMON — game.js (v3)
+   WHO'S THAT POKÉMON — game.js
    ============================================================ */
 
 /* ── CONFIG ─────────────────────────────────────────────────── */
@@ -124,7 +124,11 @@ const Api = (() => {
 const Sfx = (() => {
   let actx = null, muted = false;
   const buffers = {};
-  const ctx = () => (actx ??= new (window.AudioContext || window.webkitAudioContext)());
+  const ctx = () => {
+    actx ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    return actx;
+  };
 
   /* Chaque son = liste de notes : f (Hz), f2 (glissando), t (début), d (durée), v (volume) */
   const SOUNDS = {
@@ -337,7 +341,12 @@ const Game = (() => {
     lvl.classList.add('flash');
     setTimeout(() => lvl.classList.remove('flash'), 1500);
   }
-  function hideLevelUp() { $('levelup').classList.remove('show'); }
+  function hideLevelUp() {
+    if (!$('levelup').classList.contains('show')) return;
+    $('levelup').classList.remove('show');
+    clearTimeout(levelupTimer);
+    if (revealed) $('btn-skip').focus({ preventScroll: true });
+  }
 
   /* ── Fin de manche ── */
   function endRound(correct) {
@@ -349,7 +358,7 @@ const Game = (() => {
     closeSugg();
     renderName(); renderSkip(); renderStats();
     persist();
-    $('btn-skip').focus({ preventScroll: true });
+    if (!$('levelup').classList.contains('show')) $('btn-skip').focus({ preventScroll: true });
   }
 
   /* ── Nouveau Pokémon ── */
@@ -358,8 +367,7 @@ const Game = (() => {
     loading = true;
     hintStep = 0;
     const screen = $('screen');
-    screen.classList.remove('revealed', 'flash');
-    screen.classList.add('loading');
+    screen.classList.add('loading');   /* 'revealed' reste le temps du fondu */
     $('lcd-name').classList.remove('correct');
     $('guess-input').value = '';
     $('guess-input').classList.remove('shake', 'wrong');
@@ -370,12 +378,17 @@ const Game = (() => {
     await sleep(250);
 
     try {
-      const payload = nextPromise ? await nextPromise : await Api.loadPokemon(randomId());
+      /* si le préchargement a échoué (null), on recharge un Pokémon tout de suite */
+      const payload = (nextPromise && await nextPromise) || await Api.loadPokemon(randomId());
       nextPromise = null;
-      if (!payload) throw new Error('prefetch failed');
       current = payload; revealed = false;
+
+      /* image encore invisible : on repasse en silhouette sans transition, puis on la fait réapparaître */
+      screen.classList.add('snap');
+      screen.classList.remove('revealed', 'flash');
       $('pokemon-img').src = payload.imgUrl;
-      screen.classList.remove('loading');
+      void screen.offsetWidth;
+      screen.classList.remove('snap', 'loading');
       setPlayable(true);
       banner('info', '❔', 'ask');
       renderName(); renderSkip(); renderTexts();
@@ -439,6 +452,7 @@ const Game = (() => {
 
   /* « Passer » avant la fin de manche, « Suivant » après : même bouton */
   function skipOrNext() {
+    if (loading) return;
     Sfx.play('newmon');
     newPokemon();
   }
